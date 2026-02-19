@@ -1,10 +1,10 @@
 import { readAll } from './core/vectorstore.js';
 import { embedText } from './core/embedder.js';
 import { cosineSim } from './utils/cosineSim.js';
-import { computeScore } from './core/score.js';
+import { scoreWithBreakdown } from './core/score.js';
 
 export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = {}) {
-    console.log('🔎 [search] query', query);
+    console.log('[search] query', query);
 
     const qvec = await embedText(query);
     const items = await readAll();
@@ -13,21 +13,12 @@ export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = 
     const scoredAll = items
         .map((it) => {
             const base = cosineSim(qvec, it.vector);
-
-            const score = computeScore({
-                item: it,
-                baseScore: base,
-                query
-            });
-
-            return {
-                ...it,
-                score,
-            }
+            const { score, breakdown } = scoreWithBreakdown({ item: it, baseScore: base, query });
+            return { ...it, score, breakdown };
         })
         .sort((a, b) => b.score - a.score);
 
-    // 2) dedupe by (source, chunk_index) (and keep best score)
+    // 2) dedupe by (source, chunk_index)
     const seen = new Set();
     const deduped = [];
     for (const h of scoredAll) {
@@ -69,16 +60,29 @@ export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = 
 
     const context = contextParts.join('\n\n');
 
+    if (process.env.DEBUG_RAG === '1') {
+        console.log(`[search] index_items=${items.length} topK=${topK} context_chars=${context.length}`);
+        console.log(`[search] top_scores=${top.map((x) => Number((x.score ?? 0).toFixed(4))).join(', ')}`);
+
+        for (const h of top) {
+            const src = h.metadata?.source;
+            const ci = h.metadata?.chunk_index;
+            const b = h.breakdown ?? { base: h.score ?? 0, boosts: [], final: h.score ?? 0 };
+            const boosts = b.boosts.length
+                ? b.boosts.map((x) => `${x.name}:+${x.delta}`).join(' ')
+                : '(none)';
+
+            console.log(
+                `[hit] ${src}#${ci} base=${Number(b.base).toFixed(4)} boosts=${boosts} final=${Number(b.final).toFixed(4)}`
+            );
+        }
+    }
+
     const sources = top.map((h) => ({
         source: h.metadata.source,
         chunk_index: h.metadata.chunk_index,
         ...(Number.isFinite(h.score) ? { score: Number(h.score.toFixed(4)) } : {}),
     }));
-
-    if (process.env.DEBUG_RAG === '1') {
-        console.log(`🧠 [search] index_items=${items.length} topK=${topK} context_chars=${context.length}`);
-        console.log(`🧠 [search] top_scores=${top.map(x => Number(x.score.toFixed(4))).join(', ')}`);
-    }
 
     return { sources, context, hits: top };
 }

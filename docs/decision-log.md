@@ -31,4 +31,6 @@ Build a minimal, inspectable RAG loop to learn AI orchestration and system desig
 
 “Added reranking rule based boosts to improve retrieval quality.”
 
+“Added retriaval score to achieve retrieval trace log.”
+
 
