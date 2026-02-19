@@ -1,6 +1,7 @@
 import { readAll } from './core/vectorstore.js';
 import { embedText } from './core/embedder.js';
 import { cosineSim } from './utils/cosineSim.js';
+import { computeScore } from './core/score.js';
 
 export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = {}) {
     console.log('🔎 [search] query', query);
@@ -10,10 +11,20 @@ export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = 
 
     // 1) score everything
     const scoredAll = items
-        .map((it) => ({
-            ...it,
-            score: cosineSim(qvec, it.vector),
-        }))
+        .map((it) => {
+            const base = cosineSim(qvec, it.vector);
+
+            const score = computeScore({
+                item: it,
+                baseScore: base,
+                query
+            });
+
+            return {
+                ...it,
+                score,
+            }
+        })
         .sort((a, b) => b.score - a.score);
 
     // 2) dedupe by (source, chunk_index) (and keep best score)

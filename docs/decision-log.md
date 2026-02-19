@@ -29,4 +29,6 @@ Build a minimal, inspectable RAG loop to learn AI orchestration and system desig
 
 “Heading-aware chunking added to reduce context drift and improve definitional queries.”
 
+“Added reranking rule based boosts to improve retrieval quality.”
+
 
