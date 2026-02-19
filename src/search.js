@@ -41,8 +41,13 @@ export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = 
     const contextParts = [];
     for (let i = 0; i < top.length; i++) {
         const h = top[i];
+        const section =
+            Array.isArray(h.metadata?.section) && h.metadata.section.length
+                ? ` section="${h.metadata.section.join(' > ')}"`
+                : '';
+
         const block =
-            `[#${i + 1}] source=${h.metadata.source} chunk=${h.metadata.chunk_index}\n` +
+            `[#${i + 1}] source=${h.metadata.source} chunk=${h.metadata.chunk_index}${section}\n` +
             `${h.metadata.text}`;
 
         if (totalChars + block.length > MAX_CONTEXT_CHARS) break;

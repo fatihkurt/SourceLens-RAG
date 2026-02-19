@@ -25,3 +25,8 @@ Build a minimal, inspectable RAG loop to learn AI orchestration and system desig
 
 ### Next
 - Add rerank (optional) and an evaluation dataset (10–50 questions) with regression checks.
+
+
+“Heading-aware chunking added to reduce context drift and improve definitional queries.”
+
+
