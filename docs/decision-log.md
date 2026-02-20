@@ -35,4 +35,12 @@ Build a minimal, inspectable RAG loop to learn AI orchestration and system desig
 
 “Added extract entity candidates to improve retrieval quality.”
 
+### Retrieval Policy v1
+- Semantic similarity (cosine): “anlamsal yakınlık”
+- Entity filename match: “domain’de entity = file” (en güçlü sinyal)
+- Section match: “dosya genel ama ilgili başlık var”
+- Text match: “son çare lexical”
+- Authority docs for definition: “tanım sorusunda referans dokümanları öne al”
+
+
 

@@ -1,11 +1,19 @@
 {
   "hitRate": 1,
+  "preferHitRate": 1,
+  "pass": 10,
+  "total": 10,
+  "preferHitCount": 3,
+  "preferTotal": 3,
   "results": [
     {
       "id": "cm-01",
       "ok": true,
       "question": "Define Customer in Microsoft Advertising Customer Management.",
-      "expected": [
+      "expected_any_of": [
+        "customer-management-service/customer.md"
+      ],
+      "prefer_sources": [
         "customer-management-service/customer.md"
       ],
       "got": [
@@ -17,15 +25,21 @@
         0.7515,
         0.7175,
         0.7025
-      ]
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": true,
+      "prefer_hit_rank": 1
     },
     {
       "id": "cm-02",
       "ok": true,
       "question": "How is an AdvertiserAccount related to a Customer?",
-      "expected": [
+      "expected_any_of": [
         "customer-management-service/advertiseraccount.md",
         "customer-management-service/customer.md"
+      ],
+      "prefer_sources": [
+        "customer-management-service/advertiseraccount.md"
       ],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md",
@@ -38,15 +52,19 @@
         0.6647,
         0.6612,
         0.6497
-      ]
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": true,
+      "prefer_hit_rank": 1
     },
     {
       "id": "cm-03",
       "ok": true,
       "question": "What is a ClientLink used for in Customer Management Service?",
-      "expected": [
+      "expected_any_of": [
         "customer-management-service/clientlink.md"
       ],
+      "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\clientlink.md",
         "data\\raw\\bingads-13\\customer-management-service\\clientlink.md",
@@ -56,13 +74,19 @@
         0.7177,
         0.7027,
         0.6942
-      ]
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null
     },
     {
       "id": "cm-04",
       "ok": true,
       "question": "What is CustomerRole and what does it represent?",
-      "expected": [
+      "expected_any_of": [
+        "customer-management-service/customerrole.md"
+      ],
+      "prefer_sources": [
         "customer-management-service/customerrole.md"
       ],
       "got": [
@@ -74,15 +98,19 @@
         0.6886,
         0.6831,
         0.6821
-      ]
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": true,
+      "prefer_hit_rank": 1
     },
     {
       "id": "cm-05",
       "ok": true,
       "question": "What does the SignupCustomer operation do?",
-      "expected": [
+      "expected_any_of": [
         "customer-management-service/signupcustomer.md"
       ],
+      "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md",
         "data\\raw\\bingads-13\\customer-management-service\\accountinfowithcustomerdata.md",
@@ -92,15 +120,19 @@
         0.6739,
         0.6529,
         0.6437
-      ]
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null
     },
     {
       "id": "cm-06",
       "ok": true,
       "question": "What does the GetCustomer operation return?",
-      "expected": [
+      "expected_any_of": [
         "customer-management-service/getcustomer.md"
       ],
+      "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md",
         "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md",
@@ -110,15 +142,19 @@
         0.6882,
         0.6823,
         0.6779
-      ]
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null
     },
     {
       "id": "cm-07",
       "ok": true,
       "question": "What does GetLinkedAccountsAndCustomersInfo return?",
-      "expected": [
+      "expected_any_of": [
         "customer-management-service/getlinkedaccountsandcustomersinfo.md"
       ],
+      "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md",
         "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md",
@@ -128,15 +164,19 @@
         0.7022,
         0.6628,
         0.6421
-      ]
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null
     },
     {
       "id": "cm-08",
       "ok": true,
       "question": "How do you search for customers? (SearchCustomers operation)",
-      "expected": [
+      "expected_any_of": [
         "customer-management-service/searchcustomers.md"
       ],
+      "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\searchcustomers.md",
         "data\\raw\\bingads-13\\customer-management-service\\predicateoperator.md",
@@ -146,15 +186,19 @@
         0.7917,
         0.7607,
         0.756
-      ]
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null
     },
     {
       "id": "cm-09",
       "ok": true,
       "question": "What is CustomerLifeCycleStatus?",
-      "expected": [
+      "expected_any_of": [
         "customer-management-service/customerlifecyclestatus.md"
       ],
+      "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md",
         "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md",
@@ -164,15 +208,19 @@
         0.7193,
         0.6918,
         0.6705
-      ]
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null
     },
     {
       "id": "cm-10",
       "ok": true,
       "question": "What is CustomerFinancialStatus?",
-      "expected": [
+      "expected_any_of": [
         "customer-management-service/customerfinancialstatus.md"
       ],
+      "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md",
         "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md",
@@ -182,7 +230,10 @@
         0.7133,
         0.6918,
         0.6705
-      ]
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null
     }
   ]
 }

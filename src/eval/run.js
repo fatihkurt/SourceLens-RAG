@@ -14,6 +14,17 @@ function includesAnySource(sources, mustInclude) {
   });
 }
 
+function findFirstMatchRank(sources, patterns) {
+  if (!Array.isArray(patterns) || patterns.length === 0) return null;
+  const normalizedPatterns = patterns.map((p) => normalize(p));
+
+  for (let i = 0; i < sources.length; i += 1) {
+    const src = normalize(sources[i].source);
+    if (normalizedPatterns.some((p) => src.includes(p))) return i + 1;
+  }
+  return null;
+}
+
 async function pathExists(p) {
   try {
     await fs.access(p);
@@ -43,50 +54,92 @@ async function resolveDatasetPath(inputPath) {
   throw new Error(`No eval dataset found. Tried: ${candidates.join(', ')}`);
 }
 
+function parseCliArgs(argv) {
+  const args = argv.slice(2);
+  const debug = args.includes('--debug');
+  const datasetPath = args.find((a) => !a.startsWith('--'));
+  return { debug, datasetPath };
+}
+
 async function main() {
-  const datasetPath = await resolveDatasetPath(process.argv[2]);
+  const { debug, datasetPath: datasetArg } = parseCliArgs(process.argv);
+  const datasetPath = await resolveDatasetPath(datasetArg);
   const raw = await fs.readFile(datasetPath, 'utf8');
   const cases = JSON.parse(raw);
 
   let pass = 0;
+  let preferHitCount = 0;
   const results = [];
 
   for (const tc of cases) {
     const topk = tc.expect?.topk ?? Number(process.env.TOP_K ?? 3);
-    const { sources } = await search(tc.question, { topK: topk });
+    const { sources, hits } = await search(tc.question, { topK: topk });
 
-    const must = tc.expect?.must_include_sources ?? [];
-    const ok = must.length === 0 ? true : includesAnySource(sources, must);
+    const mustAny = tc.expect?.must_include_any_of ?? tc.expect?.must_include_sources ?? [];
+    const prefer = tc.expect?.prefer_sources ?? [];
+    const ok = mustAny.length === 0 ? true : includesAnySource(sources, mustAny);
+    const preferHit = prefer.length === 0 ? null : includesAnySource(sources, prefer);
+    const mustRank = findFirstMatchRank(sources, mustAny);
+    const preferRank = findFirstMatchRank(sources, prefer);
 
     results.push({
       id: tc.id,
       ok,
       question: tc.question,
-      expected: must,
+      expected_any_of: mustAny,
+      prefer_sources: prefer,
       got: sources.map((s) => s.source),
       scores: sources.map((s) => s.score),
+      must_hit_rank: mustRank,
+      prefer_hit: preferHit,
+      prefer_hit_rank: preferRank,
     });
 
     if (ok) pass += 1;
+    if (preferHit === true) preferHitCount += 1;
+
+    if (debug && !ok) {
+      console.log(`[debug] ${tc.id} top-${topk} breakdown`);
+      hits.forEach((h, i) => {
+        const boosts = (h.breakdown?.boosts ?? [])
+          .map((b) => `${b.name}:+${b.delta}`)
+          .join(' ') || '(none)';
+        console.log(
+          `  #${i + 1} ${h.metadata?.source} chunk=${h.metadata?.chunk_index} ` +
+          `base=${Number(h.breakdown?.base ?? h.score ?? 0).toFixed(4)} ` +
+          `boosts=${boosts} final=${Number(h.score ?? 0).toFixed(4)}`
+        );
+      });
+      console.log('');
+    }
   }
 
   const total = cases.length;
   const hitRate = total ? pass / total : 0;
+  const preferTotal = cases.filter((tc) => (tc.expect?.prefer_sources ?? []).length > 0).length;
+  const preferHitRate = preferTotal ? preferHitCount / preferTotal : null;
 
   console.log(`\nEval results: ${pass}/${total} passed (hit-rate=${hitRate.toFixed(2)})\n`);
+  if (preferHitRate !== null) {
+    console.log(`Preference hit-rate: ${preferHitCount}/${preferTotal} (${preferHitRate.toFixed(2)})\n`);
+  }
 
   for (const r of results) {
     if (r.ok) continue;
     console.log(`${r.id} FAILED`);
     console.log(`Q: ${r.question}`);
-    console.log(`Expected source contains: ${JSON.stringify(r.expected)}`);
+    console.log(`Expected any source contains: ${JSON.stringify(r.expected_any_of)}`);
     console.log('Got sources:');
     r.got.forEach((g, i) => console.log(`  - ${g} (score=${r.scores[i]})`));
     console.log('');
   }
 
   const outPath = path.join(path.dirname(datasetPath), 'last_report.json');
-  await fs.writeFile(outPath, JSON.stringify({ hitRate, results }, null, 2), 'utf8');
+  await fs.writeFile(
+    outPath,
+    JSON.stringify({ hitRate, preferHitRate, pass, total, preferHitCount, preferTotal, results }, null, 2),
+    'utf8'
+  );
   console.log(`Wrote report: ${outPath}`);
 }
 

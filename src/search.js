@@ -30,7 +30,7 @@ export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = 
     const seen = new Set();
     const deduped = [];
     for (const h of scoredAll) {
-        const key = `${h.metadata?.source ?? ''}::${h.metadata?.chunk_index ?? ''}`;
+        const key = h.id ?? `${h.metadata.source}::${h.metadata.chunk_index}`;
         if (seen.has(key)) continue;
         seen.add(key);
         deduped.push(h);

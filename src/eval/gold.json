@@ -2,16 +2,21 @@
   {
     "id": "cm-01",
     "question": "Define Customer in Microsoft Advertising Customer Management.",
-    "expect": { "must_include_sources": ["customer-management-service/customer.md"], "topk": 3 }
+    "expect": {
+      "must_include_any_of": ["customer-management-service/customer.md"],
+      "prefer_sources": ["customer-management-service/customer.md"],
+      "topk": 3
+    }
   },
   {
     "id": "cm-02",
     "question": "How is an AdvertiserAccount related to a Customer?",
     "expect": {
-      "must_include_sources": [
+      "must_include_any_of": [
         "customer-management-service/advertiseraccount.md",
         "customer-management-service/customer.md"
       ],
+      "prefer_sources": ["customer-management-service/advertiseraccount.md"],
       "topk": 4
     }
   },
@@ -23,7 +28,11 @@
   {
     "id": "cm-04",
     "question": "What is CustomerRole and what does it represent?",
-    "expect": { "must_include_sources": ["customer-management-service/customerrole.md"], "topk": 3 }
+    "expect": {
+      "must_include_any_of": ["customer-management-service/customerrole.md"],
+      "prefer_sources": ["customer-management-service/customerrole.md"],
+      "topk": 3
+    }
   },
   {
     "id": "cm-05",
