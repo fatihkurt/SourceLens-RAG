@@ -2,6 +2,7 @@ import { readAll } from './core/vectorstore.js';
 import { embedText } from './core/embedder.js';
 import { cosineSim } from './utils/cosineSim.js';
 import { scoreWithBreakdown } from './core/score.js';
+import { extractEntityCandidates } from './core/entityExtract.js';
 
 export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = {}) {
     console.log('[search] query', query);
@@ -9,11 +10,18 @@ export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = 
     const qvec = await embedText(query);
     const items = await readAll();
 
+    const entityCandidates = extractEntityCandidates(query);
+
     // 1) score everything
     const scoredAll = items
         .map((it) => {
             const base = cosineSim(qvec, it.vector);
-            const { score, breakdown } = scoreWithBreakdown({ item: it, baseScore: base, query });
+            const { score, breakdown } = scoreWithBreakdown({ 
+                item: it, 
+                baseScore: base, 
+                query,
+                extra: { entityCandidates }
+             });
             return { ...it, score, breakdown };
         })
         .sort((a, b) => b.score - a.score);
@@ -61,6 +69,7 @@ export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = 
     const context = contextParts.join('\n\n');
 
     if (process.env.DEBUG_RAG === '1') {
+        console.log('🧩 [search] entityCandidates=', entityCandidates);
         console.log(`[search] index_items=${items.length} topK=${topK} context_chars=${context.length}`);
         console.log(`[search] top_scores=${top.map((x) => Number((x.score ?? 0).toFixed(4))).join(', ')}`);
 

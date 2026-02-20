@@ -33,4 +33,6 @@ Build a minimal, inspectable RAG loop to learn AI orchestration and system desig
 
 “Added retriaval score to achieve retrieval trace log.”
 
+“Added extract entity candidates to improve retrieval quality.”
+
 

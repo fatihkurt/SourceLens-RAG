@@ -1,0 +1,189 @@
+{
+  "hitRate": 0.7,
+  "results": [
+    {
+      "id": "cm-01",
+      "ok": true,
+      "question": "What is a Customer in Microsoft Advertising?",
+      "expected": [
+        "customer-management-service/customer.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md",
+        "data\\raw\\bingads-13\\customer-management-service\\address.md"
+      ],
+      "scores": [
+        0.6817,
+        0.6567,
+        0.6554
+      ]
+    },
+    {
+      "id": "cm-02",
+      "ok": true,
+      "question": "What is the relationship between Customer and Account?",
+      "expected": [
+        "customer-management-service/customer.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\contactinfo.md",
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\predicate.md"
+      ],
+      "scores": [
+        0.6997,
+        0.6967,
+        0.696
+      ]
+    },
+    {
+      "id": "cm-03",
+      "ok": true,
+      "question": "What is a ClientLink used for?",
+      "expected": [
+        "customer-management-service/clientlink.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md",
+        "data\\raw\\bingads-13\\customer-management-service\\servicelevel.md",
+        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md"
+      ],
+      "scores": [
+        0.6551,
+        0.6548,
+        0.6397
+      ]
+    },
+    {
+      "id": "cm-04",
+      "ok": true,
+      "question": "What does SignupCustomer do?",
+      "expected": [
+        "customer-management-service/signupcustomer.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\predicate.md",
+        "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md"
+      ],
+      "scores": [
+        0.6391,
+        0.6196,
+        0.612
+      ]
+    },
+    {
+      "id": "cm-05",
+      "ok": true,
+      "question": "How do you get a customer by ID?",
+      "expected": [
+        "customer-management-service/getcustomer.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md"
+      ],
+      "scores": [
+        0.7513,
+        0.7461,
+        0.7339
+      ]
+    },
+    {
+      "id": "cm-06",
+      "ok": true,
+      "question": "What does GetLinkedAccountsAndCustomersInfo return?",
+      "expected": [
+        "customer-management-service/getlinkedaccountsandcustomersinfo.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md",
+        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md",
+        "data\\raw\\bingads-13\\customer-management-service\\searchaccounts.md"
+      ],
+      "scores": [
+        0.6822,
+        0.6428,
+        0.6297
+      ]
+    },
+    {
+      "id": "cm-07",
+      "ok": false,
+      "question": "What is CustomerRole and what does it represent?",
+      "expected": [
+        "customer-management-service/customerrole.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\address.md",
+        "data\\raw\\bingads-13\\customer-management-service\\contactinfo.md",
+        "data\\raw\\bingads-13\\customer-management-service\\customerinfo.md"
+      ],
+      "scores": [
+        0.6821,
+        0.6816,
+        0.6752
+      ]
+    },
+    {
+      "id": "cm-08",
+      "ok": false,
+      "question": "What is an AdvertiserAccount (or Advertiser Account) and how is it related to a customer?",
+      "expected": [
+        "customer-management-service/advertiseraccount.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\customerinfo.md"
+      ],
+      "scores": [
+        0.8188,
+        0.7964,
+        0.7906
+      ]
+    },
+    {
+      "id": "cm-09",
+      "ok": false,
+      "question": "What are common fields on the Customer object?",
+      "expected": [
+        "customer-management-service/customer.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\predicate.md",
+        "data\\raw\\bingads-13\\customer-management-service\\searchaccounts.md",
+        "data\\raw\\bingads-13\\customer-management-service\\applicationfault.md"
+      ],
+      "scores": [
+        0.7219,
+        0.7211,
+        0.7004
+      ]
+    },
+    {
+      "id": "cm-10",
+      "ok": true,
+      "question": "What is the purpose of AccountHierarchy or managing permissions across accounts?",
+      "expected": [
+        "customer-management-service"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\accountinfowithcustomerdata.md",
+        "data\\raw\\bingads-13\\customer-management-service\\userinvitation.md",
+        "data\\raw\\bingads-13\\customer-management-service\\getuser.md",
+        "data\\raw\\bingads-13\\customer-management-service\\customerrole.md",
+        "data\\raw\\bingads-13\\customer-management-service\\customerrole.md"
+      ],
+      "scores": [
+        0.7471,
+        0.7367,
+        0.7331,
+        0.7309,
+        0.7297
+      ]
+    }
+  ]
+}

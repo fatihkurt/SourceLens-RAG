@@ -1,0 +1,188 @@
+{
+  "hitRate": 1,
+  "results": [
+    {
+      "id": "cm-01",
+      "ok": true,
+      "question": "Define Customer in Microsoft Advertising Customer Management.",
+      "expected": [
+        "customer-management-service/customer.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md",
+        "data\\raw\\bingads-13\\customer-management-service\\taxcertificatestatus.md"
+      ],
+      "scores": [
+        0.7515,
+        0.7175,
+        0.7025
+      ]
+    },
+    {
+      "id": "cm-02",
+      "ok": true,
+      "question": "How is an AdvertiserAccount related to a Customer?",
+      "expected": [
+        "customer-management-service/advertiseraccount.md",
+        "customer-management-service/customer.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md",
+        "data\\raw\\bingads-13\\customer-management-service\\apifault.md",
+        "data\\raw\\bingads-13\\customer-management-service\\predicate.md",
+        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md"
+      ],
+      "scores": [
+        0.6662,
+        0.6647,
+        0.6612,
+        0.6497
+      ]
+    },
+    {
+      "id": "cm-03",
+      "ok": true,
+      "question": "What is a ClientLink used for in Customer Management Service?",
+      "expected": [
+        "customer-management-service/clientlink.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md",
+        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md",
+        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md"
+      ],
+      "scores": [
+        0.7177,
+        0.7027,
+        0.6942
+      ]
+    },
+    {
+      "id": "cm-04",
+      "ok": true,
+      "question": "What is CustomerRole and what does it represent?",
+      "expected": [
+        "customer-management-service/customerrole.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\customerrole.md",
+        "data\\raw\\bingads-13\\customer-management-service\\customerrole.md",
+        "data\\raw\\bingads-13\\customer-management-service\\address.md"
+      ],
+      "scores": [
+        0.6886,
+        0.6831,
+        0.6821
+      ]
+    },
+    {
+      "id": "cm-05",
+      "ok": true,
+      "question": "What does the SignupCustomer operation do?",
+      "expected": [
+        "customer-management-service/signupcustomer.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\accountinfowithcustomerdata.md",
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md"
+      ],
+      "scores": [
+        0.6739,
+        0.6529,
+        0.6437
+      ]
+    },
+    {
+      "id": "cm-06",
+      "ok": true,
+      "question": "What does the GetCustomer operation return?",
+      "expected": [
+        "customer-management-service/getcustomer.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md",
+        "data\\raw\\bingads-13\\customer-management-service\\user.md"
+      ],
+      "scores": [
+        0.6882,
+        0.6823,
+        0.6779
+      ]
+    },
+    {
+      "id": "cm-07",
+      "ok": true,
+      "question": "What does GetLinkedAccountsAndCustomersInfo return?",
+      "expected": [
+        "customer-management-service/getlinkedaccountsandcustomersinfo.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md",
+        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md",
+        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md"
+      ],
+      "scores": [
+        0.7022,
+        0.6628,
+        0.6421
+      ]
+    },
+    {
+      "id": "cm-08",
+      "ok": true,
+      "question": "How do you search for customers? (SearchCustomers operation)",
+      "expected": [
+        "customer-management-service/searchcustomers.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\searchcustomers.md",
+        "data\\raw\\bingads-13\\customer-management-service\\predicateoperator.md",
+        "data\\raw\\bingads-13\\customer-management-service\\predicate.md"
+      ],
+      "scores": [
+        0.7917,
+        0.7607,
+        0.756
+      ]
+    },
+    {
+      "id": "cm-09",
+      "ok": true,
+      "question": "What is CustomerLifeCycleStatus?",
+      "expected": [
+        "customer-management-service/customerlifecyclestatus.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md",
+        "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md",
+        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md"
+      ],
+      "scores": [
+        0.7193,
+        0.6918,
+        0.6705
+      ]
+    },
+    {
+      "id": "cm-10",
+      "ok": true,
+      "question": "What is CustomerFinancialStatus?",
+      "expected": [
+        "customer-management-service/customerfinancialstatus.md"
+      ],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md",
+        "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md",
+        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md"
+      ],
+      "scores": [
+        0.7133,
+        0.6918,
+        0.6705
+      ]
+    }
+  ]
+}

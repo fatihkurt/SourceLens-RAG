@@ -1,6 +1,6 @@
 import { retrievalConfig } from './retrievalConfig.js';
 
-export function scoreWithBreakdown({ item, baseScore, query }) {
+export function scoreWithBreakdown({ item, baseScore, query, extra }) {
   const applied = [];
   let score = baseScore;
 
@@ -12,6 +12,8 @@ export function scoreWithBreakdown({ item, baseScore, query }) {
           source: item.metadata?.source ?? '',
           section: item.metadata?.section ?? [],
           query,
+          entityCandidates: extra?.entityCandidates ?? [],
+          text: item.metadata?.text ?? '',
         })
       );
     } catch {
