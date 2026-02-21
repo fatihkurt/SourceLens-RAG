@@ -34,15 +34,25 @@ test('fallback enforces minimum token length and uniqueness', () => {
   assert.deepEqual(out, ['account', 'ads']);
 });
 
+test('cm-04 style question extracts CustomerRole', () => {
+  const out = extractEntityCandidates('What is CustomerRole and what does it represent?');
+  assert.deepEqual(out, ['CustomerRole']);
+});
+
+test('cm-04 style question with enrichment still extracts CustomerRole', () => {
+  const out = extractEntityCandidates('What is CustomerRole and what does it represent? (Bing Ads Customer Management Service)');
+  assert.deepEqual(out, ['CustomerRole']);
+});
+
 test('gold eval questions produce entity candidates aligned with expected sources', async () => {
-  const goldPath = new URL('../eval/gold.json', import.meta.url);
+  const goldPath = new URL('../../eval/gold.json', import.meta.url);
   const cases = JSON.parse(await fs.readFile(goldPath, 'utf8'));
 
   for (const tc of cases) {
     const out = extractEntityCandidates(tc.question);
     assert.ok(out.length > 0, `${tc.id}: expected at least one extracted candidate`);
 
-    const expectedStems = (tc.expect?.must_include_sources ?? [])
+    const expectedStems = (tc.expect?.must_include_any_of ?? tc.expect?.must_include_sources ?? [])
       .map((s) => String(s).split('/').pop() ?? '')
       .map((file) => file.replace(/\.md$/i, '').toLowerCase())
       .filter(Boolean);

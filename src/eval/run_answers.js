@@ -1,0 +1,151 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { ask } from '../askCore.js';
+
+function norm(p) {
+  return String(p).replace(/\\/g, '/').toLowerCase();
+}
+
+function findBestRank(gotSources, needles) {
+  const got = gotSources.map((s) => norm(s.source));
+  let best = null;
+  for (const n of needles) {
+    const needle = norm(n);
+    const idx = got.findIndex((g) => g.includes(needle));
+    if (idx >= 0) best = best === null ? (idx + 1) : Math.min(best, idx + 1);
+  }
+  return best; // 1-based or null
+}
+
+async function sleep(ms) {
+  if (!ms) return;
+  await new Promise((r) => setTimeout(r, ms));
+}
+
+async function main() {
+  const datasetPath = process.argv[2] ?? path.join(process.cwd(), 'eval', 'gold.json');
+  const raw = await fs.readFile(datasetPath, 'utf8');
+  const cases = JSON.parse(raw);
+
+  const queryEnrichment = String(process.env.EVAL_QUERY_ENRICHMENT ?? '').trim();
+  const temperature = Number(process.env.EVAL_TEMPERATURE ?? 0.2);
+  const defaultTopK = Number(process.env.TOP_K ?? 3);
+  const sleepMs = Number(process.env.EVAL_SLEEP_MS ?? 0);
+  const maxCases = Number(process.env.EVAL_MAX_CASES ?? 0); // 0 = all
+
+  const results = [];
+  let pass = 0;
+  let preferHitCount = 0;
+  let preferTotal = 0;
+
+  let totalLatency = 0;
+  let totalPromptTokens = 0;
+  let totalCompletionTokens = 0;
+  let totalCalls = 0;
+  let errors = 0;
+
+  const runList = maxCases > 0 ? cases.slice(0, maxCases) : cases;
+
+  for (const tc of runList) {
+    const topk = tc.expect?.topk ?? defaultTopK;
+    const expected =
+      tc.expected_any_of ??
+      tc.expect?.expected_any_of ??
+      tc.expect?.must_include_sources ??
+      tc.expect?.must_include_any_of ??
+      [];
+    const prefer =
+      tc.prefer_sources ??
+      tc.expect?.prefer_sources ??
+      [];
+
+    let out = null;
+    let err = null;
+
+    try {
+      out = await ask(tc.question, {
+        temperature,
+        topK: topk,
+        queryEnrichment,
+      });
+
+      totalCalls++;
+      totalLatency += Number(out?.meta?.latency_ms ?? 0);
+
+      const usage = out?.meta?.usage ?? {};
+      totalPromptTokens += Number(usage.prompt_tokens ?? 0);
+      totalCompletionTokens += Number(usage.completion_tokens ?? 0);
+
+    } catch (e) {
+      errors++;
+      err = String(e?.message ?? e);
+    }
+
+    const gotSources = out?.sources ?? [];
+    const mustRank = expected.length ? findBestRank(gotSources, expected) : 1;
+    const ok = err ? false : (expected.length ? mustRank !== null : true);
+
+    if (ok) pass++;
+
+    let preferHit = null;
+    let preferRank = null;
+
+    if (prefer.length) {
+      preferTotal++;
+      if (!err) {
+        preferRank = findBestRank(gotSources, prefer);
+        preferHit = preferRank !== null;
+        if (preferHit) preferHitCount++;
+      } else {
+        preferHit = false;
+      }
+    }
+
+    results.push({
+      id: tc.id,
+      ok,
+      question: tc.question,
+      expected_any_of: expected,
+      prefer_sources: prefer,
+      got: gotSources.map((s) => `${s.source}#${s.chunk_index}`),
+      scores: gotSources.map((s) => s.score),
+      must_hit_rank: mustRank,
+      prefer_hit: prefer.length ? preferHit : null,
+      prefer_hit_rank: prefer.length ? preferRank : null,
+      confidence: out?.confidence ?? null,
+      latency_ms: out?.meta?.latency_ms ?? null,
+      usage: out?.meta?.usage ?? null,
+      error: err,
+    });
+
+    if (sleepMs) await sleep(sleepMs);
+  }
+
+  const total = runList.length;
+  const hitRate = total ? pass / total : 0;
+  const preferHitRate = preferTotal ? preferHitCount / preferTotal : 0;
+
+  const summary = {
+    hitRate,
+    preferHitRate,
+    pass,
+    total,
+    preferHitCount,
+    preferTotal,
+    errors,
+    avgLatencyMs: totalCalls ? Math.round(totalLatency / totalCalls) : null,
+    avgPromptTokens: totalCalls ? Math.round(totalPromptTokens / totalCalls) : null,
+    avgCompletionTokens: totalCalls ? Math.round(totalCompletionTokens / totalCalls) : null,
+    results,
+  };
+
+  console.log(JSON.stringify(summary, null, 2));
+
+  const outPath = path.join(process.cwd(), 'eval', 'last_answers_report.json');
+  await fs.writeFile(outPath, JSON.stringify(summary, null, 2), 'utf8');
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
