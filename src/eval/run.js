@@ -74,7 +74,10 @@ async function main() {
 
   for (const tc of cases) {
     const topk = tc.expect?.topk ?? Number(config.retrieval.topK);
-    const { sources, hits } = await search(tc.question, { topK: topk });
+    const { sources, hits } = await search(tc.question, {
+      topK: topk,
+      contextDebug: config.eval.mode,
+    });
 
     const mustAny = tc.expect?.must_include_any_of ?? tc.expect?.must_include_sources ?? [];
     const prefer = tc.expect?.prefer_sources ?? [];

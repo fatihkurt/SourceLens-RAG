@@ -25,11 +25,13 @@ const SCHEMA_HINT = `{
 }`;
 
 class LLMParseError extends Error {
-    constructor(message, rawContent = '') {
+    constructor(message, { rawContent = '', usage = null, latencyMs = null } = {}) {
         super(message);
         this.name = 'LLMParseError';
         this.rawContent = rawContent;
         this.rawText = rawContent;
+        this.usage = usage;
+        this.latencyMs = latencyMs;
     }
 }
 
@@ -50,6 +52,16 @@ function applyConfidenceCalibration({ validated, sources, context }) {
     };
 }
 
+function logPathResponse(tag, response) {
+    console.log(`[askCore:${tag}] response`, {
+        answer: response?.answer,
+        confidence: response?.confidence,
+        assumptions_count: Array.isArray(response?.assumptions) ? response.assumptions.length : 0,
+        sources_count: Array.isArray(response?.sources) ? response.sources.length : 0,
+        meta: response?.meta ?? {},
+    });
+}
+
 async function repairToJson({ rawText, schemaHint, temperature = 0 }) {
     const { baseUrl, apiKey, model } = config.llm;
 
@@ -67,6 +79,7 @@ Rules:
     const baseBackoffMs = config.llm.retryBaseMs;
     const maxBackoffMs = config.llm.retryMaxMs;
 
+    const t0 = Date.now();
     const res = await retryWithBackoff(
         async () =>
             fetch(`${baseUrl}/chat/completions`, {
@@ -99,8 +112,13 @@ Rules:
         throw new Error(`Repair call failed: ${res.status} ${res.statusText} ${t.slice(0, 200)}`);
     }
 
+    const t1 = Date.now();
     const data = await res.json();
-    return data?.choices?.[0]?.message?.content ?? '';
+    return {
+        content: data?.choices?.[0]?.message?.content ?? '',
+        usage: data?.usage ?? null,
+        latencyMs: t1 - t0,
+    };
 }
 
 async function llmChatOnce({ question, context, sources, temperature = 0.2, strictJson = false }) {
@@ -184,14 +202,25 @@ Rules:
     const data = await res.json();
     const content = data?.choices?.[0]?.message?.content ?? '';
     const usage = data?.usage;
+    const latencyMs = t1 - t0;
 
     let parsed;
     try {
         parsed = extractFirstJsonObject(content);
-        if (!parsed) throw new LLMParseError('No valid JSON object found in model response', content);
+        if (!parsed) {
+            throw new LLMParseError('No valid JSON object found in model response', {
+                rawContent: content,
+                usage,
+                latencyMs,
+            });
+        }
     } catch (e) {
         if (e?.name === 'LLMParseError') throw e;
-        throw new LLMParseError(`Failed to parse LLM response: ${e.message}`, content);
+        throw new LLMParseError(`Failed to parse LLM response: ${e.message}`, {
+            rawContent: content,
+            usage,
+            latencyMs,
+        });
     }
 
     let validated;
@@ -199,18 +228,22 @@ Rules:
         // We trust retrieval sources more than model self-reporting, so we overwrite
         validated = AnswerSchema.parse({ ...parsed, sources });
     } catch (e) {
-        throw new LLMParseError(`Parsed JSON failed schema validation: ${e.message}`, content);
+        throw new LLMParseError(`Parsed JSON failed schema validation: ${e.message}`, {
+            rawContent: content,
+            usage,
+            latencyMs,
+        });
     }
 
     const calibrated = applyConfidenceCalibration({ validated, sources, context });
 
-    return {
+    const out = {
         answer: calibrated.answer,
         confidence: calibrated.confidence,
         assumptions: calibrated.assumptions,
         sources: calibrated.sources,
         meta: {
-            latency_ms: t1 - t0,
+            latency_ms: latencyMs,
             usage,
             model,
             temperature,
@@ -218,13 +251,23 @@ Rules:
             llm_confidence: calibrated._confidence_debug,
         },
     };
+
+    if (strictJson) {
+        logPathResponse('strict_json', out);
+    }
+
+    return out;
 }
 
 async function llmChat({ question, context, sources, temperature = 0.2 }) {
+    const t0 = Date.now();
+    let firstParseError = null;
+
     try {
         return await llmChatOnce({ question, context, sources, temperature, strictJson: false });
     } catch (e1) {
         if (e1?.name !== 'LLMParseError') throw e1;
+        firstParseError = e1;
     }
 
     try {
@@ -232,30 +275,50 @@ async function llmChat({ question, context, sources, temperature = 0.2 }) {
     } catch (e2) {
         if (e2?.name !== 'LLMParseError') throw e2;
 
-        const repairedText = await repairToJson({
+        const repair = await repairToJson({
             rawText: e2.rawContent ?? e2.rawText ?? String(e2.message ?? ''),
             schemaHint: SCHEMA_HINT,
             temperature: 0,
         });
 
-        const repairedObj = extractFirstJsonObject(repairedText);
+        const repairedObj = extractFirstJsonObject(repair.content);
         if (!repairedObj) throw new Error('Repair produced no JSON');
 
         const validated = AnswerSchema.parse({ ...repairedObj, sources });
         const calibrated = applyConfidenceCalibration({ validated, sources, context });
-        return {
+
+        const usageParts = [firstParseError?.usage, e2?.usage, repair.usage].filter(Boolean);
+        const mergedUsage = usageParts.length
+            ? usageParts.reduce((acc, u) => ({
+                prompt_tokens: (acc.prompt_tokens ?? 0) + Number(u.prompt_tokens ?? 0),
+                completion_tokens: (acc.completion_tokens ?? 0) + Number(u.completion_tokens ?? 0),
+                total_tokens: (acc.total_tokens ?? 0) + Number(u.total_tokens ?? 0),
+            }), {})
+            : null;
+
+        const out = {
             answer: calibrated.answer,
             confidence: calibrated.confidence,
             assumptions: calibrated.assumptions,
             sources: calibrated.sources,
             meta: {
+                latency_ms: Date.now() - t0,
+                usage: mergedUsage,
                 model: config.llm.model,
                 temperature,
                 strict_json: true,
                 repaired: true,
-                confidence_debug: calibrated._confidence_debug,
+                llm_confidence: calibrated._confidence_debug,
+                attempt_latencies_ms: {
+                    pass_1: firstParseError?.latencyMs ?? null,
+                    pass_2: e2?.latencyMs ?? null,
+                    repair: repair.latencyMs ?? null,
+                },
             },
         };
+
+        logPathResponse('repair', out);
+        return out;
     }
 }
 
@@ -264,6 +327,7 @@ export async function ask(question, {
     temperature,
     topK,
     queryEnrichment,
+    contextDebug = false,
 } = {}) {
     const q = String(question ?? '').trim();
     if (!q) throw new Error('Question is empty');
@@ -275,6 +339,7 @@ export async function ask(question, {
 
     const { context, sources } = await search(enriched, {
         topK: Number(topK ?? config.retrieval.topK),
+        contextDebug: Boolean(contextDebug),
     });
 
     const temp = Number.isFinite(Number(temperature))

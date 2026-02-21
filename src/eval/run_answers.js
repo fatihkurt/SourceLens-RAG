@@ -69,6 +69,7 @@ async function main() {
         temperature,
         topK: topk,
         queryEnrichment,
+        contextDebug: config.eval.mode,
       });
 
       totalCalls++;

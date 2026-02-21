@@ -8,9 +8,9 @@
   "confidenceViolations": 0,
   "confidenceViolationRate": 0,
   "errors": 0,
-  "avgLatencyMs": 22897,
-  "avgPromptTokens": 583,
-  "avgCompletionTokens": 204,
+  "avgLatencyMs": 19698,
+  "avgPromptTokens": 586,
+  "avgCompletionTokens": 163,
   "results": [
     {
       "id": "cm-01",
@@ -37,10 +37,10 @@
       "prefer_hit_rank": 1,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 16901,
+      "latency_ms": 12137,
       "usage": {
-        "prompt_tokens": 300,
-        "completion_tokens": 163,
+        "prompt_tokens": 327,
+        "completion_tokens": 136,
         "total_tokens": 463
       },
       "error": null
@@ -73,11 +73,11 @@
       "prefer_hit_rank": 1,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 37418,
+      "latency_ms": 26287,
       "usage": {
-        "prompt_tokens": 852,
-        "completion_tokens": 357,
-        "total_tokens": 1209
+        "prompt_tokens": 862,
+        "completion_tokens": 180,
+        "total_tokens": 1042
       },
       "error": null
     },
@@ -104,11 +104,11 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 31732,
+      "latency_ms": 25657,
       "usage": {
-        "prompt_tokens": 911,
-        "completion_tokens": 246,
-        "total_tokens": 1157
+        "prompt_tokens": 884,
+        "completion_tokens": 162,
+        "total_tokens": 1046
       },
       "error": null
     },
@@ -137,11 +137,11 @@
       "prefer_hit_rank": 1,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 19531,
+      "latency_ms": 14706,
       "usage": {
         "prompt_tokens": 508,
-        "completion_tokens": 192,
-        "total_tokens": 700
+        "completion_tokens": 120,
+        "total_tokens": 628
       },
       "error": null
     },
@@ -168,11 +168,11 @@
       "prefer_hit_rank": null,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 18385,
+      "latency_ms": 25031,
       "usage": {
-        "prompt_tokens": 716,
-        "completion_tokens": 63,
-        "total_tokens": 779
+        "prompt_tokens": 725,
+        "completion_tokens": 208,
+        "total_tokens": 933
       },
       "error": null
     },
@@ -199,11 +199,11 @@
       "prefer_hit_rank": null,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 28461,
+      "latency_ms": 18442,
       "usage": {
-        "prompt_tokens": 666,
-        "completion_tokens": 240,
-        "total_tokens": 906
+        "prompt_tokens": 683,
+        "completion_tokens": 84,
+        "total_tokens": 767
       },
       "error": null
     },
@@ -230,11 +230,11 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 30986,
+      "latency_ms": 28542,
       "usage": {
-        "prompt_tokens": 727,
-        "completion_tokens": 291,
-        "total_tokens": 1018
+        "prompt_tokens": 692,
+        "completion_tokens": 240,
+        "total_tokens": 932
       },
       "error": null
     },
@@ -261,11 +261,11 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 23617,
+      "latency_ms": 24229,
       "usage": {
-        "prompt_tokens": 536,
-        "completion_tokens": 243,
-        "total_tokens": 779
+        "prompt_tokens": 563,
+        "completion_tokens": 252,
+        "total_tokens": 815
       },
       "error": null
     },
@@ -292,11 +292,11 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 8660,
+      "latency_ms": 10680,
       "usage": {
-        "prompt_tokens": 311,
-        "completion_tokens": 81,
-        "total_tokens": 392
+        "prompt_tokens": 309,
+        "completion_tokens": 118,
+        "total_tokens": 427
       },
       "error": null
     },
@@ -323,11 +323,11 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 13276,
+      "latency_ms": 11266,
       "usage": {
-        "prompt_tokens": 305,
-        "completion_tokens": 161,
-        "total_tokens": 466
+        "prompt_tokens": 304,
+        "completion_tokens": 131,
+        "total_tokens": 435
       },
       "error": null
     }
