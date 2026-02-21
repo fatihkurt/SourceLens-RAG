@@ -58,14 +58,24 @@ export const config = {
     temperature: num('EVAL_TEMPERATURE', 0.2),
     sleepMs: num('EVAL_SLEEP_MS', 0),
     maxCases: num('EVAL_MAX_CASES', 0),
+    gate: {
+      maxErrors: num('EVAL_GATE_MAX_ERRORS', 0),
+      minHitRate: num('EVAL_GATE_MIN_HIT_RATE', 1.0),
+      minPreferHitRate: num('EVAL_GATE_MIN_PREFER_HIT_RATE', 1.0),
+      maxConfidenceViolationRate: num('EVAL_GATE_MAX_CONF_VIOLATION_RATE', 0),
+      warnAvgPromptTokens: num('EVAL_GATE_WARN_AVG_PROMPT_TOKENS', 650),
+      warnAvgLatencyMs: num('EVAL_GATE_WARN_AVG_LATENCY_MS', 30000),
+    },
+  },
+
+  answer: {
+    maxWords: Math.max(10, Math.floor(num('ANSWER_MAX_WORDS', 100))),
   },
 };
 
-function requireLLMConfig() {
+export function requireLLMConfig() {
   const { baseUrl, apiKey, model } = config.llm;
   if (!baseUrl || !apiKey || !model) {
     throw new Error('Missing LLM config: LLM_BASE_URL, LLM_API_KEY, LLM_MODEL');
   }
 }
-
-requireLLMConfig();

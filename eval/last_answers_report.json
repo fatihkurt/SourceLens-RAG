@@ -8,9 +8,9 @@
   "confidenceViolations": 0,
   "confidenceViolationRate": 0,
   "errors": 0,
-  "avgLatencyMs": 19698,
-  "avgPromptTokens": 586,
-  "avgCompletionTokens": 163,
+  "avgLatencyMs": 16675,
+  "avgPromptTokens": 512,
+  "avgCompletionTokens": 131,
   "results": [
     {
       "id": "cm-01",
@@ -37,11 +37,11 @@
       "prefer_hit_rank": 1,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 12137,
+      "latency_ms": 8244,
       "usage": {
-        "prompt_tokens": 327,
-        "completion_tokens": 136,
-        "total_tokens": 463
+        "prompt_tokens": 272,
+        "completion_tokens": 89,
+        "total_tokens": 361
       },
       "error": null
     },
@@ -73,11 +73,11 @@
       "prefer_hit_rank": 1,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 26287,
+      "latency_ms": 23737,
       "usage": {
-        "prompt_tokens": 862,
-        "completion_tokens": 180,
-        "total_tokens": 1042
+        "prompt_tokens": 725,
+        "completion_tokens": 195,
+        "total_tokens": 920
       },
       "error": null
     },
@@ -104,11 +104,11 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 25657,
+      "latency_ms": 22063,
       "usage": {
-        "prompt_tokens": 884,
-        "completion_tokens": 162,
-        "total_tokens": 1046
+        "prompt_tokens": 830,
+        "completion_tokens": 89,
+        "total_tokens": 919
       },
       "error": null
     },
@@ -137,11 +137,11 @@
       "prefer_hit_rank": 1,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 14706,
+      "latency_ms": 15326,
       "usage": {
-        "prompt_tokens": 508,
-        "completion_tokens": 120,
-        "total_tokens": 628
+        "prompt_tokens": 466,
+        "completion_tokens": 107,
+        "total_tokens": 573
       },
       "error": null
     },
@@ -168,11 +168,11 @@
       "prefer_hit_rank": null,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 25031,
+      "latency_ms": 17828,
       "usage": {
-        "prompt_tokens": 725,
-        "completion_tokens": 208,
-        "total_tokens": 933
+        "prompt_tokens": 638,
+        "completion_tokens": 86,
+        "total_tokens": 724
       },
       "error": null
     },
@@ -199,11 +199,11 @@
       "prefer_hit_rank": null,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 18442,
+      "latency_ms": 16109,
       "usage": {
-        "prompt_tokens": 683,
-        "completion_tokens": 84,
-        "total_tokens": 767
+        "prompt_tokens": 605,
+        "completion_tokens": 73,
+        "total_tokens": 678
       },
       "error": null
     },
@@ -230,11 +230,11 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 28542,
+      "latency_ms": 23638,
       "usage": {
-        "prompt_tokens": 692,
-        "completion_tokens": 240,
-        "total_tokens": 932
+        "prompt_tokens": 592,
+        "completion_tokens": 198,
+        "total_tokens": 790
       },
       "error": null
     },
@@ -261,11 +261,11 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 24229,
+      "latency_ms": 20239,
       "usage": {
-        "prompt_tokens": 563,
-        "completion_tokens": 252,
-        "total_tokens": 815
+        "prompt_tokens": 486,
+        "completion_tokens": 218,
+        "total_tokens": 704
       },
       "error": null
     },
@@ -292,11 +292,11 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 10680,
+      "latency_ms": 9869,
       "usage": {
-        "prompt_tokens": 309,
-        "completion_tokens": 118,
-        "total_tokens": 427
+        "prompt_tokens": 253,
+        "completion_tokens": 127,
+        "total_tokens": 380
       },
       "error": null
     },
@@ -323,11 +323,11 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 11266,
+      "latency_ms": 9696,
       "usage": {
-        "prompt_tokens": 304,
-        "completion_tokens": 131,
-        "total_tokens": 435
+        "prompt_tokens": 250,
+        "completion_tokens": 126,
+        "total_tokens": 376
       },
       "error": null
     }

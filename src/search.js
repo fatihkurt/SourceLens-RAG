@@ -5,7 +5,7 @@ import { scoreWithBreakdown } from './core/score.js';
 import { extractEntityCandidates } from './core/entityExtract.js';
 import { config } from './core/config.js';
 
-function buildMergedContext(hits, { maxChars, debug = false } = {}) {
+export function buildMergedContext(hits, { maxChars, debug = false } = {}) {
     const order = [];
     const groups = new Map();
 

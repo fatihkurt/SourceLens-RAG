@@ -7,6 +7,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "eval": "node ./src/eval/run_answers.js ./eval/gold.json",
+    "eval:gate": "node ./src/eval/gate.js ./eval/last_answers_report.json",
     "test": "node --test"
   },
   "dependencies": {

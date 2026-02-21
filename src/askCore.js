@@ -3,7 +3,7 @@ import { parseRetryAfterMs, retryWithBackoff } from './utils/retryWithBackoff.js
 import { extractFirstJsonObject } from './utils/jsonExtractor.js';
 import { search } from './search.js';
 import { calibrateConfidence, minConfidence } from './core/confidence.js';
-import { config } from './core/config.js';
+import { config, requireLLMConfig } from './core/config.js';
 
 
 const AnswerSchema = z.object({
@@ -63,6 +63,7 @@ function logPathResponse(tag, response) {
 }
 
 async function repairToJson({ rawText, schemaHint, temperature = 0 }) {
+    requireLLMConfig();
     const { baseUrl, apiKey, model } = config.llm;
 
     const system = `
@@ -122,7 +123,9 @@ Rules:
 }
 
 async function llmChatOnce({ question, context, sources, temperature = 0.2, strictJson = false }) {
+    requireLLMConfig();
     const { baseUrl, apiKey, model } = config.llm;
+    const maxWords = config.answer.maxWords;
 
     const system = strictJson ? `
 You are SourceLens Core.
@@ -143,6 +146,7 @@ Rules:
 - If context is insufficient, say so and set confidence to low.
 - Always include sources that support the answer (may be empty if insufficient).
 - Be concise and precise.
+- Keep the answer under ${maxWords} words.
 `.trim()
         : `
 You are SourceLens Core.
@@ -159,6 +163,7 @@ Rules:
 - If context is insufficient, say so and set confidence to low.
 - Always include sources that support the answer (may be empty if insufficient).
 - Be concise and precise.
+- Keep the answer under ${maxWords} words.
 `.trim();
 
     const maxRetries = config.llm.maxRetries;
