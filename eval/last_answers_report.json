@@ -1,13 +1,15 @@
 {
   "hitRate": 1,
   "preferHitRate": 1,
-  "pass": 4,
-  "total": 4,
+  "pass": 10,
+  "total": 10,
   "preferHitCount": 3,
   "preferTotal": 3,
+  "confidenceViolations": 0,
+  "confidenceViolationRate": 0,
   "errors": 0,
-  "avgLatencyMs": 23922,
-  "avgPromptTokens": 643,
+  "avgLatencyMs": 22897,
+  "avgPromptTokens": 583,
   "avgCompletionTokens": 204,
   "results": [
     {
@@ -21,9 +23,9 @@
         "customer-management-service/customer.md"
       ],
       "got": [
-        "data\\raw\\bingads-13\\customer-management-service\\customer.md",
-        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md",
-        "data\\raw\\bingads-13\\customer-management-service\\taxcertificatestatus.md"
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md#1",
+        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md#1",
+        "data\\raw\\bingads-13\\customer-management-service\\taxcertificatestatus.md#1"
       ],
       "scores": [
         0.7515,
@@ -34,11 +36,12 @@
       "prefer_hit": true,
       "prefer_hit_rank": 1,
       "confidence": "high",
-      "latency_ms": 13418,
+      "confidence_violation": false,
+      "latency_ms": 16901,
       "usage": {
         "prompt_tokens": 300,
-        "completion_tokens": 126,
-        "total_tokens": 426
+        "completion_tokens": 163,
+        "total_tokens": 463
       },
       "error": null
     },
@@ -54,10 +57,10 @@
         "customer-management-service/advertiseraccount.md"
       ],
       "got": [
-        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md",
-        "data\\raw\\bingads-13\\customer-management-service\\apifault.md",
-        "data\\raw\\bingads-13\\customer-management-service\\predicate.md",
-        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md"
+        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md#1",
+        "data\\raw\\bingads-13\\customer-management-service\\apifault.md#4",
+        "data\\raw\\bingads-13\\customer-management-service\\predicate.md#10",
+        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md#7"
       ],
       "scores": [
         0.6662,
@@ -68,12 +71,13 @@
       "must_hit_rank": 1,
       "prefer_hit": true,
       "prefer_hit_rank": 1,
-      "confidence": "high",
-      "latency_ms": 29897,
+      "confidence": "medium",
+      "confidence_violation": false,
+      "latency_ms": 37418,
       "usage": {
         "prompt_tokens": 852,
-        "completion_tokens": 236,
-        "total_tokens": 1088
+        "completion_tokens": 357,
+        "total_tokens": 1209
       },
       "error": null
     },
@@ -86,9 +90,9 @@
       ],
       "prefer_sources": [],
       "got": [
-        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md",
-        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md",
-        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md"
+        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md#15",
+        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md#7",
+        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md#16"
       ],
       "scores": [
         0.7177,
@@ -99,11 +103,12 @@
       "prefer_hit": null,
       "prefer_hit_rank": null,
       "confidence": "high",
-      "latency_ms": 33496,
+      "confidence_violation": false,
+      "latency_ms": 31732,
       "usage": {
         "prompt_tokens": 911,
-        "completion_tokens": 268,
-        "total_tokens": 1179
+        "completion_tokens": 246,
+        "total_tokens": 1157
       },
       "error": null
     },
@@ -118,9 +123,9 @@
         "customer-management-service/customerrole.md"
       ],
       "got": [
-        "data\\raw\\bingads-13\\customer-management-service\\customerrole.md",
-        "data\\raw\\bingads-13\\customer-management-service\\customerrole.md",
-        "data\\raw\\bingads-13\\customer-management-service\\address.md"
+        "data\\raw\\bingads-13\\customer-management-service\\customerrole.md#4",
+        "data\\raw\\bingads-13\\customer-management-service\\customerrole.md#10",
+        "data\\raw\\bingads-13\\customer-management-service\\address.md#1"
       ],
       "scores": [
         0.6886,
@@ -130,12 +135,199 @@
       "must_hit_rank": 1,
       "prefer_hit": true,
       "prefer_hit_rank": 1,
-      "confidence": "high",
-      "latency_ms": 18877,
+      "confidence": "medium",
+      "confidence_violation": false,
+      "latency_ms": 19531,
       "usage": {
         "prompt_tokens": 508,
-        "completion_tokens": 185,
-        "total_tokens": 693
+        "completion_tokens": 192,
+        "total_tokens": 700
+      },
+      "error": null
+    },
+    {
+      "id": "cm-05",
+      "ok": true,
+      "question": "What does the SignupCustomer operation do?",
+      "expected_any_of": [
+        "customer-management-service/signupcustomer.md"
+      ],
+      "prefer_sources": [],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md#8",
+        "data\\raw\\bingads-13\\customer-management-service\\accountinfowithcustomerdata.md#6",
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md#10"
+      ],
+      "scores": [
+        0.6739,
+        0.6529,
+        0.6437
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null,
+      "confidence": "medium",
+      "confidence_violation": false,
+      "latency_ms": 18385,
+      "usage": {
+        "prompt_tokens": 716,
+        "completion_tokens": 63,
+        "total_tokens": 779
+      },
+      "error": null
+    },
+    {
+      "id": "cm-06",
+      "ok": true,
+      "question": "What does the GetCustomer operation return?",
+      "expected_any_of": [
+        "customer-management-service/getcustomer.md"
+      ],
+      "prefer_sources": [],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md#15",
+        "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md#5",
+        "data\\raw\\bingads-13\\customer-management-service\\user.md#9"
+      ],
+      "scores": [
+        0.6882,
+        0.6823,
+        0.6779
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null,
+      "confidence": "medium",
+      "confidence_violation": false,
+      "latency_ms": 28461,
+      "usage": {
+        "prompt_tokens": 666,
+        "completion_tokens": 240,
+        "total_tokens": 906
+      },
+      "error": null
+    },
+    {
+      "id": "cm-07",
+      "ok": true,
+      "question": "What does GetLinkedAccountsAndCustomersInfo return?",
+      "expected_any_of": [
+        "customer-management-service/getlinkedaccountsandcustomersinfo.md"
+      ],
+      "prefer_sources": [],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md#15",
+        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md#14",
+        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md#3"
+      ],
+      "scores": [
+        0.7022,
+        0.6628,
+        0.6421
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null,
+      "confidence": "high",
+      "confidence_violation": false,
+      "latency_ms": 30986,
+      "usage": {
+        "prompt_tokens": 727,
+        "completion_tokens": 291,
+        "total_tokens": 1018
+      },
+      "error": null
+    },
+    {
+      "id": "cm-08",
+      "ok": true,
+      "question": "How do you search for customers? (SearchCustomers operation)",
+      "expected_any_of": [
+        "customer-management-service/searchcustomers.md"
+      ],
+      "prefer_sources": [],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\searchcustomers.md#1",
+        "data\\raw\\bingads-13\\customer-management-service\\predicateoperator.md#1",
+        "data\\raw\\bingads-13\\customer-management-service\\predicate.md#11"
+      ],
+      "scores": [
+        0.7917,
+        0.7607,
+        0.756
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null,
+      "confidence": "high",
+      "confidence_violation": false,
+      "latency_ms": 23617,
+      "usage": {
+        "prompt_tokens": 536,
+        "completion_tokens": 243,
+        "total_tokens": 779
+      },
+      "error": null
+    },
+    {
+      "id": "cm-09",
+      "ok": true,
+      "question": "What is CustomerLifeCycleStatus?",
+      "expected_any_of": [
+        "customer-management-service/customerlifecyclestatus.md"
+      ],
+      "prefer_sources": [],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md#1",
+        "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md#5",
+        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md#1"
+      ],
+      "scores": [
+        0.7193,
+        0.6918,
+        0.6705
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null,
+      "confidence": "high",
+      "confidence_violation": false,
+      "latency_ms": 8660,
+      "usage": {
+        "prompt_tokens": 311,
+        "completion_tokens": 81,
+        "total_tokens": 392
+      },
+      "error": null
+    },
+    {
+      "id": "cm-10",
+      "ok": true,
+      "question": "What is CustomerFinancialStatus?",
+      "expected_any_of": [
+        "customer-management-service/customerfinancialstatus.md"
+      ],
+      "prefer_sources": [],
+      "got": [
+        "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md#1",
+        "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md#6",
+        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md#1"
+      ],
+      "scores": [
+        0.7133,
+        0.6918,
+        0.6705
+      ],
+      "must_hit_rank": 1,
+      "prefer_hit": null,
+      "prefer_hit_rank": null,
+      "confidence": "high",
+      "confidence_violation": false,
+      "latency_ms": 13276,
+      "usage": {
+        "prompt_tokens": 305,
+        "completion_tokens": 161,
+        "total_tokens": 466
       },
       "error": null
     }

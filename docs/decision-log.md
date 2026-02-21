@@ -42,5 +42,15 @@ Build a minimal, inspectable RAG loop to learn AI orchestration and system desig
 - Text match: “son çare lexical”
 - Authority docs for definition: “tanım sorusunda referans dokümanları öne al”
 
+Enrichment sadece bazı intentlerde (operation soruları?) kullanılsın
+
+Entity sorularında enrichment kapalı kalsın
+
+TODO: Enrichment should be disabled for entity queries, since they are already scoped to the entity. Might applied some operation queries.
 
 
+“Answer eval added; hitRate/preferHitRate regression check.”
+
+“JSON strict retry + repair; errors=0.”
+
+“Deterministic confidence calibration; violations=0.”

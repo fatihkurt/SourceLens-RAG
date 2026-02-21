@@ -1,8 +1,9 @@
-import 'dotenv/config';
 import { z } from 'zod';
 import { parseRetryAfterMs, retryWithBackoff } from './utils/retryWithBackoff.js';
 import { extractFirstJsonObject } from './utils/jsonExtractor.js';
 import { search } from './search.js';
+import { calibrateConfidence, minConfidence } from './core/confidence.js';
+import { config } from './core/config.js';
 
 
 const AnswerSchema = z.object({
@@ -32,14 +33,25 @@ class LLMParseError extends Error {
     }
 }
 
-async function repairToJson({ rawText, schemaHint, temperature = 0 }) {
-    const baseUrl = process.env.LLM_BASE_URL;
-    const apiKey = process.env.LLM_API_KEY;
-    const model = process.env.LLM_MODEL;
+function applyConfidenceCalibration({ validated, sources, context }) {
+    const retrievalConfidence = calibrateConfidence({
+        sources,
+        contextChars: String(context ?? '').length,
+    });
+    const confidence = minConfidence(validated.confidence, retrievalConfidence);
+    return {
+        ...validated,
+        confidence,
+        _confidence_debug: {
+            llm: validated.confidence,
+            retrieval: retrievalConfidence,
+            final: confidence,
+        },
+    };
+}
 
-    if (!baseUrl || !apiKey || !model) {
-        throw new Error('LLM_BASE_URL, LLM_API_KEY, and LLM_MODEL must be set in the environment');
-    }
+async function repairToJson({ rawText, schemaHint, temperature = 0 }) {
+    const { baseUrl, apiKey, model } = config.llm;
 
     const system = `
 You are a JSON repair tool.
@@ -51,9 +63,9 @@ Rules:
 - If information is missing, use empty strings/arrays and set confidence to "low".
 `.trim();
 
-    const maxRetries = Number(process.env.LLM_MAX_RETRIES ?? 3);
-    const baseBackoffMs = Number(process.env.LLM_RETRY_BASE_MS ?? 500);
-    const maxBackoffMs = Number(process.env.LLM_RETRY_MAX_MS ?? 10000);
+    const maxRetries = config.llm.maxRetries;
+    const baseBackoffMs = config.llm.retryBaseMs;
+    const maxBackoffMs = config.llm.retryMaxMs;
 
     const res = await retryWithBackoff(
         async () =>
@@ -92,13 +104,7 @@ Rules:
 }
 
 async function llmChatOnce({ question, context, sources, temperature = 0.2, strictJson = false }) {
-    const baseUrl = process.env.LLM_BASE_URL;
-    const apiKey = process.env.LLM_API_KEY;
-    const model = process.env.LLM_MODEL;
-
-    if (!baseUrl || !apiKey || !model) {
-        throw new Error('LLM_BASE_URL, LLM_API_KEY, and LLM_MODEL must be set in the environment');
-    }
+    const { baseUrl, apiKey, model } = config.llm;
 
     const system = strictJson ? `
 You are SourceLens Core.
@@ -137,9 +143,9 @@ Rules:
 - Be concise and precise.
 `.trim();
 
-    const maxRetries = Number(process.env.LLM_MAX_RETRIES ?? 3);
-    const baseBackoffMs = Number(process.env.LLM_RETRY_BASE_MS ?? 500);
-    const maxBackoffMs = Number(process.env.LLM_RETRY_MAX_MS ?? 10000);
+    const maxRetries = config.llm.maxRetries;
+    const baseBackoffMs = config.llm.retryBaseMs;
+    const maxBackoffMs = config.llm.retryMaxMs;
 
     const t0 = Date.now();
     const res = await retryWithBackoff(
@@ -196,14 +202,20 @@ Rules:
         throw new LLMParseError(`Parsed JSON failed schema validation: ${e.message}`, content);
     }
 
+    const calibrated = applyConfidenceCalibration({ validated, sources, context });
+
     return {
-        ...validated,
+        answer: calibrated.answer,
+        confidence: calibrated.confidence,
+        assumptions: calibrated.assumptions,
+        sources: calibrated.sources,
         meta: {
             latency_ms: t1 - t0,
             usage,
             model,
             temperature,
             strict_json: strictJson,
+            llm_confidence: calibrated._confidence_debug,
         },
     };
 }
@@ -230,13 +242,18 @@ async function llmChat({ question, context, sources, temperature = 0.2 }) {
         if (!repairedObj) throw new Error('Repair produced no JSON');
 
         const validated = AnswerSchema.parse({ ...repairedObj, sources });
+        const calibrated = applyConfidenceCalibration({ validated, sources, context });
         return {
-            ...validated,
+            answer: calibrated.answer,
+            confidence: calibrated.confidence,
+            assumptions: calibrated.assumptions,
+            sources: calibrated.sources,
             meta: {
-                model: process.env.LLM_MODEL,
+                model: config.llm.model,
                 temperature,
                 strict_json: true,
                 repaired: true,
+                confidence_debug: calibrated._confidence_debug,
             },
         };
     }
@@ -257,12 +274,12 @@ export async function ask(question, {
         : q;
 
     const { context, sources } = await search(enriched, {
-        topK: Number(topK ?? process.env.TOP_K ?? 3),
+        topK: Number(topK ?? config.retrieval.topK),
     });
 
     const temp = Number.isFinite(Number(temperature))
         ? Number(temperature)
-        : Number(process.env.LLM_TEMPERATURE ?? 0.2);
+        : Number(config.llm.temperature);
 
     return llmChat({
         question: q,

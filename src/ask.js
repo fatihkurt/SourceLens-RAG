@@ -1,5 +1,5 @@
-import 'dotenv/config';
 import { ask } from './askCore.js';
+import { config } from './core/config.js';
 
 async function main() {
     const args = process.argv.slice(2);
@@ -13,13 +13,13 @@ async function main() {
     const tempArg = args[1];
     const temperature = tempArg && Number(tempArg) > 0 && Number(tempArg) <= 1
         ? Number(tempArg)
-        : Number(process.env.LLM_TEMPERATURE ?? 0.2);
+        : Number(config.llm.temperature);
 
-    const queryEnrichment = process.env.QUERY_ENRICHMENT;
+    const queryEnrichment = config.query.enrichment;
 
     const out = await ask(question, {
         temperature,
-        topK: Number(process.env.TOP_K ?? 3),
+        topK: Number(config.retrieval.topK),
         queryEnrichment,
     });
 

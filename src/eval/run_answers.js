@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ask } from '../askCore.js';
+import { config } from '../core/config.js';
 
 function norm(p) {
   return String(p).replace(/\\/g, '/').toLowerCase();
@@ -27,11 +28,11 @@ async function main() {
   const raw = await fs.readFile(datasetPath, 'utf8');
   const cases = JSON.parse(raw);
 
-  const queryEnrichment = String(process.env.EVAL_QUERY_ENRICHMENT ?? '').trim();
-  const temperature = Number(process.env.EVAL_TEMPERATURE ?? 0.2);
-  const defaultTopK = Number(process.env.TOP_K ?? 3);
-  const sleepMs = Number(process.env.EVAL_SLEEP_MS ?? 0);
-  const maxCases = Number(process.env.EVAL_MAX_CASES ?? 0); // 0 = all
+  const queryEnrichment = config.eval.queryEnrichment;
+  const temperature = Number(config.eval.temperature);
+  const defaultTopK = Number(config.retrieval.topK);
+  const sleepMs = Number(config.eval.sleepMs);
+  const maxCases = Number(config.eval.maxCases); // 0 = all
 
   const results = [];
   let pass = 0;
@@ -43,6 +44,7 @@ async function main() {
   let totalCompletionTokens = 0;
   let totalCalls = 0;
   let errors = 0;
+  let confidenceViolations = 0;
 
   const runList = maxCases > 0 ? cases.slice(0, maxCases) : cases;
 
@@ -84,8 +86,10 @@ async function main() {
     const gotSources = out?.sources ?? [];
     const mustRank = expected.length ? findBestRank(gotSources, expected) : 1;
     const ok = err ? false : (expected.length ? mustRank !== null : true);
+    const confidenceViolation = mustRank === null && out?.confidence === 'high';
 
     if (ok) pass++;
+    if (confidenceViolation) confidenceViolations++;
 
     let preferHit = null;
     let preferRank = null;
@@ -113,6 +117,7 @@ async function main() {
       prefer_hit: prefer.length ? preferHit : null,
       prefer_hit_rank: prefer.length ? preferRank : null,
       confidence: out?.confidence ?? null,
+      confidence_violation: confidenceViolation,
       latency_ms: out?.meta?.latency_ms ?? null,
       usage: out?.meta?.usage ?? null,
       error: err,
@@ -124,6 +129,7 @@ async function main() {
   const total = runList.length;
   const hitRate = total ? pass / total : 0;
   const preferHitRate = preferTotal ? preferHitCount / preferTotal : 0;
+  const confidenceViolationRate = total ? confidenceViolations / total : 0;
 
   const summary = {
     hitRate,
@@ -132,6 +138,8 @@ async function main() {
     total,
     preferHitCount,
     preferTotal,
+    confidenceViolations,
+    confidenceViolationRate,
     errors,
     avgLatencyMs: totalCalls ? Math.round(totalLatency / totalCalls) : null,
     avgPromptTokens: totalCalls ? Math.round(totalPromptTokens / totalCalls) : null,

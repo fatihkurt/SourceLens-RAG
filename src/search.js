@@ -3,8 +3,9 @@ import { embedText } from './core/embedder.js';
 import { cosineSim } from './utils/cosineSim.js';
 import { scoreWithBreakdown } from './core/score.js';
 import { extractEntityCandidates } from './core/entityExtract.js';
+import { config } from './core/config.js';
 
-export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = {}) {
+export async function search(query, { topK = Number(config.retrieval.topK) } = {}) {
     console.log('[search] query', query);
 
     const qvec = await embedText(query);
@@ -45,7 +46,7 @@ export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = 
     const top = deduped.slice(0, topK);
 
     // 4) context length limit (chars)
-    const MAX_CONTEXT_CHARS = Number(process.env.MAX_CONTEXT_CHARS ?? 3500);
+    const MAX_CONTEXT_CHARS = Number(config.retrieval.maxContextChars);
     let totalChars = 0;
 
     const contextParts = [];
@@ -68,7 +69,7 @@ export async function search(query, { topK = Number(process.env.TOP_K ?? 3) } = 
 
     const context = contextParts.join('\n\n');
 
-    if (process.env.DEBUG_RAG === '1') {
+    if (config.retrieval.debug) {
         console.log('🧩 [search] entityCandidates=', entityCandidates);
         console.log(`[search] index_items=${items.length} topK=${topK} context_chars=${context.length}`);
         console.log(`[search] top_scores=${top.map((x) => Number((x.score ?? 0).toFixed(4))).join(', ')}`);

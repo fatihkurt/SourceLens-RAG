@@ -1,10 +1,10 @@
-import 'dotenv/config';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { chunkMarkdown } from './core/chunker.js';
 import { embedText } from './core/embedder.js';
 import { appendMany, getDefaultIndexPath } from './core/vectorstore.js';
+import { config } from './core/config.js';
 
 async function listFiles(dir) {
     const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -50,8 +50,8 @@ async function main() {
 
         const text = await fs.readFile(filePath, 'utf8');
         const chunks = chunkMarkdown(text, {
-            chunkSize: Number(process.env.CHUNK_SIZE ?? 900),
-            overlap: Number(process.env.CHUNK_OVERLAP ?? 180),
+            chunkSize: Number(config.ingest.chunkSize),
+            overlap: Number(config.ingest.chunkOverlap),
         });
 
         const rel = path.relative(process.cwd(), filePath);

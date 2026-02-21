@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { search } from '../search.js';
+import { config } from '../core/config.js';
 
 function normalize(p) {
   return String(p ?? '').replace(/\\/g, '/').toLowerCase();
@@ -72,7 +73,7 @@ async function main() {
   const results = [];
 
   for (const tc of cases) {
-    const topk = tc.expect?.topk ?? Number(process.env.TOP_K ?? 3);
+    const topk = tc.expect?.topk ?? Number(config.retrieval.topK);
     const { sources, hits } = await search(tc.question, { topK: topk });
 
     const mustAny = tc.expect?.must_include_any_of ?? tc.expect?.must_include_sources ?? [];
