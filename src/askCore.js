@@ -36,10 +36,11 @@ class LLMParseError extends Error {
     }
 }
 
-function applyConfidenceCalibration({ validated, sources, context }) {
+function applyConfidenceCalibration({ validated, sources, hits, context }) {
     const retrievalConfidence = calibrateConfidence({
         sources,
-        contextChars: String(context ?? '').length,
+        hits,
+        context,
     });
     const confidence = minConfidence(validated.confidence, retrievalConfidence);
     return {
@@ -123,7 +124,7 @@ Rules:
     };
 }
 
-async function llmChatOnce({ question, context, sources, temperature = 0.2, strictJson = false }) {
+async function llmChatOnce({ question, context, sources, hits, temperature = 0.2, strictJson = false }) {
     requireLLMConfig();
     const { baseUrl, apiKey, model } = config.llm;
     const maxWords = config.answer.maxWords;
@@ -241,7 +242,7 @@ Rules:
         });
     }
 
-    const calibrated = applyConfidenceCalibration({ validated, sources, context });
+    const calibrated = applyConfidenceCalibration({ validated, sources, hits, context });
 
     const out = {
         answer: calibrated.answer,
@@ -265,19 +266,19 @@ Rules:
     return out;
 }
 
-async function llmChat({ question, context, sources, temperature = 0.2 }) {
+async function llmChat({ question, context, sources, hits, temperature = 0.2 }) {
     const t0 = Date.now();
     let firstParseError = null;
 
     try {
-        return await llmChatOnce({ question, context, sources, temperature, strictJson: false });
+        return await llmChatOnce({ question, context, sources, hits, temperature, strictJson: false });
     } catch (e1) {
         if (e1?.name !== 'LLMParseError') throw e1;
         firstParseError = e1;
     }
 
     try {
-        return await llmChatOnce({ question, context, sources, temperature: 0, strictJson: true });
+        return await llmChatOnce({ question, context, sources, hits, temperature: 0, strictJson: true });
     } catch (e2) {
         if (e2?.name !== 'LLMParseError') throw e2;
 
@@ -291,7 +292,7 @@ async function llmChat({ question, context, sources, temperature = 0.2 }) {
         if (!repairedObj) throw new Error('Repair produced no JSON');
 
         const validated = AnswerSchema.parse({ ...repairedObj, sources });
-        const calibrated = applyConfidenceCalibration({ validated, sources, context });
+        const calibrated = applyConfidenceCalibration({ validated, sources, hits, context });
 
         const usageParts = [firstParseError?.usage, e2?.usage, repair.usage].filter(Boolean);
         const mergedUsage = usageParts.length
@@ -349,7 +350,7 @@ export async function ask(question, {
         ? `${q} (${queryEnrichment})`
         : q;
 
-    const { context, sources } = await search(enriched, {
+    const { context, sources, hits } = await search(enriched, {
         topK: Number(topK ?? config.retrieval.topK),
         topN: Number(topN ?? config.retrieval.topN),
         entityCandidates: resolvedEntityCandidates,
@@ -365,6 +366,7 @@ export async function ask(question, {
         question: q,
         context,
         sources,
+        hits,
         temperature: temp,
     });
 }
