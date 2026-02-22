@@ -30,6 +30,7 @@ export const config = {
 
   retrieval: {
     topK: num('TOP_K', 3),
+    topN: num('TOP_N', 300),
     maxContextChars: num('MAX_CONTEXT_CHARS', 3500),
     fileDiversity: num('FILE_DIVERSITY', 1), // same file max hits (future use)
     debug: bool('DEBUG_RAG', false),

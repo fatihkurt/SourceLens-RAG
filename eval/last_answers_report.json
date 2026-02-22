@@ -8,9 +8,9 @@
   "confidenceViolations": 0,
   "confidenceViolationRate": 0,
   "errors": 0,
-  "avgLatencyMs": 16675,
-  "avgPromptTokens": 512,
-  "avgCompletionTokens": 131,
+  "avgLatencyMs": 19896,
+  "avgPromptTokens": 543,
+  "avgCompletionTokens": 158,
   "results": [
     {
       "id": "cm-01",
@@ -24,24 +24,24 @@
       ],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\customer.md#1",
-        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md#1",
-        "data\\raw\\bingads-13\\customer-management-service\\taxcertificatestatus.md#1"
+        "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md#6",
+        "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md#5"
       ],
       "scores": [
-        0.7515,
-        0.7175,
-        0.7025
+        0.6165,
+        0.6253,
+        0.6253
       ],
       "must_hit_rank": 1,
       "prefer_hit": true,
       "prefer_hit_rank": 1,
-      "confidence": "high",
+      "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 8244,
+      "latency_ms": 25453,
       "usage": {
-        "prompt_tokens": 272,
-        "completion_tokens": 89,
-        "total_tokens": 361
+        "prompt_tokens": 347,
+        "completion_tokens": 264,
+        "total_tokens": 611
       },
       "error": null
     },
@@ -58,26 +58,26 @@
       ],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md#1",
-        "data\\raw\\bingads-13\\customer-management-service\\apifault.md#4",
-        "data\\raw\\bingads-13\\customer-management-service\\predicate.md#10",
-        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md#7"
+        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md#7",
+        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md#15",
+        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md#12"
       ],
       "scores": [
-        0.6662,
-        0.6647,
-        0.6612,
-        0.6497
+        0.5812,
+        0.5647,
+        0.5533,
+        0.5522
       ],
       "must_hit_rank": 1,
       "prefer_hit": true,
       "prefer_hit_rank": 1,
-      "confidence": "medium",
+      "confidence": "low",
       "confidence_violation": false,
-      "latency_ms": 23737,
+      "latency_ms": 25364,
       "usage": {
-        "prompt_tokens": 725,
-        "completion_tokens": 195,
-        "total_tokens": 920
+        "prompt_tokens": 956,
+        "completion_tokens": 100,
+        "total_tokens": 1056
       },
       "error": null
     },
@@ -91,24 +91,24 @@
       "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\clientlink.md#15",
-        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md#7",
-        "data\\raw\\bingads-13\\customer-management-service\\clientlink.md#16"
+        "data\\raw\\bingads-13\\customer-management-service\\addclientlinks.md#6",
+        "data\\raw\\bingads-13\\customer-management-service\\searchclientlinks.md#6"
       ],
       "scores": [
-        0.7177,
-        0.7027,
-        0.6942
+        0.6027,
+        0.6135,
+        0.6135
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
       "prefer_hit_rank": null,
-      "confidence": "high",
+      "confidence": "low",
       "confidence_violation": false,
-      "latency_ms": 22063,
+      "latency_ms": 24058,
       "usage": {
-        "prompt_tokens": 830,
-        "completion_tokens": 89,
-        "total_tokens": 919
+        "prompt_tokens": 642,
+        "completion_tokens": 190,
+        "total_tokens": 832
       },
       "error": null
     },
@@ -128,20 +128,20 @@
         "data\\raw\\bingads-13\\customer-management-service\\address.md#1"
       ],
       "scores": [
-        0.6886,
-        0.6831,
-        0.6821
+        0.5736,
+        0.5681,
+        0.6671
       ],
       "must_hit_rank": 1,
       "prefer_hit": true,
       "prefer_hit_rank": 1,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 15326,
+      "latency_ms": 16929,
       "usage": {
-        "prompt_tokens": 466,
-        "completion_tokens": 107,
-        "total_tokens": 573
+        "prompt_tokens": 535,
+        "completion_tokens": 111,
+        "total_tokens": 646
       },
       "error": null
     },
@@ -155,24 +155,24 @@
       "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md#8",
-        "data\\raw\\bingads-13\\customer-management-service\\accountinfowithcustomerdata.md#6",
-        "data\\raw\\bingads-13\\customer-management-service\\customer.md#10"
+        "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md#3",
+        "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md#29"
       ],
       "scores": [
-        0.6739,
-        0.6529,
-        0.6437
+        0.6039,
+        0.5734,
+        0.569
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
       "prefer_hit_rank": null,
-      "confidence": "medium",
+      "confidence": "low",
       "confidence_violation": false,
-      "latency_ms": 17828,
+      "latency_ms": 21734,
       "usage": {
-        "prompt_tokens": 638,
-        "completion_tokens": 86,
-        "total_tokens": 724
+        "prompt_tokens": 556,
+        "completion_tokens": 182,
+        "total_tokens": 738
       },
       "error": null
     },
@@ -187,23 +187,23 @@
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md#15",
         "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md#5",
-        "data\\raw\\bingads-13\\customer-management-service\\user.md#9"
+        "data\\raw\\bingads-13\\customer-management-service\\getcustomerpilotfeatures.md#15"
       ],
       "scores": [
-        0.6882,
-        0.6823,
-        0.6779
+        0.6182,
+        0.6123,
+        0.6136
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
       "prefer_hit_rank": null,
-      "confidence": "medium",
+      "confidence": "low",
       "confidence_violation": false,
-      "latency_ms": 16109,
+      "latency_ms": 19843,
       "usage": {
-        "prompt_tokens": 605,
-        "completion_tokens": 73,
-        "total_tokens": 678
+        "prompt_tokens": 587,
+        "completion_tokens": 141,
+        "total_tokens": 728
       },
       "error": null
     },
@@ -221,20 +221,20 @@
         "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md#3"
       ],
       "scores": [
-        0.7022,
-        0.6628,
-        0.6421
+        0.6322,
+        0.5928,
+        0.5721
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
       "prefer_hit_rank": null,
-      "confidence": "high",
+      "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 23638,
+      "latency_ms": 23487,
       "usage": {
-        "prompt_tokens": 592,
-        "completion_tokens": 198,
-        "total_tokens": 790
+        "prompt_tokens": 719,
+        "completion_tokens": 153,
+        "total_tokens": 872
       },
       "error": null
     },
@@ -249,23 +249,23 @@
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\searchcustomers.md#1",
         "data\\raw\\bingads-13\\customer-management-service\\predicateoperator.md#1",
-        "data\\raw\\bingads-13\\customer-management-service\\predicate.md#11"
+        "data\\raw\\bingads-13\\customer-management-service\\getcustomersinfo.md#1"
       ],
       "scores": [
-        0.7917,
-        0.7607,
-        0.756
+        0.7217,
+        0.7407,
+        0.7503
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
       "prefer_hit_rank": null,
-      "confidence": "high",
+      "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 20239,
+      "latency_ms": 16408,
       "usage": {
-        "prompt_tokens": 486,
-        "completion_tokens": 218,
-        "total_tokens": 704
+        "prompt_tokens": 387,
+        "completion_tokens": 152,
+        "total_tokens": 539
       },
       "error": null
     },
@@ -280,23 +280,23 @@
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md#1",
         "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md#5",
-        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md#1"
+        "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md#3"
       ],
       "scores": [
-        0.7193,
-        0.6918,
-        0.6705
+        0.6193,
+        0.5918,
+        0.5414
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
       "prefer_hit_rank": null,
-      "confidence": "high",
+      "confidence": "low",
       "confidence_violation": false,
-      "latency_ms": 9869,
+      "latency_ms": 17180,
       "usage": {
-        "prompt_tokens": 253,
-        "completion_tokens": 127,
-        "total_tokens": 380
+        "prompt_tokens": 387,
+        "completion_tokens": 202,
+        "total_tokens": 589
       },
       "error": null
     },
@@ -314,20 +314,20 @@
         "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md#1"
       ],
       "scores": [
-        0.7133,
-        0.6918,
-        0.6705
+        0.6133,
+        0.5918,
+        0.6555
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
       "prefer_hit_rank": null,
-      "confidence": "high",
+      "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 9696,
+      "latency_ms": 8506,
       "usage": {
-        "prompt_tokens": 250,
-        "completion_tokens": 126,
-        "total_tokens": 376
+        "prompt_tokens": 313,
+        "completion_tokens": 85,
+        "total_tokens": 398
       },
       "error": null
     }

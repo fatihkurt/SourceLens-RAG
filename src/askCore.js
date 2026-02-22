@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { parseRetryAfterMs, retryWithBackoff } from './utils/retryWithBackoff.js';
 import { extractFirstJsonObject } from './utils/jsonExtractor.js';
 import { search } from './search.js';
+import { extractEntityCandidates } from './core/entityExtract.js';
 import { calibrateConfidence, minConfidence } from './core/confidence.js';
 import { config, requireLLMConfig } from './core/config.js';
 
@@ -331,11 +332,17 @@ async function llmChat({ question, context, sources, temperature = 0.2 }) {
 export async function ask(question, {
     temperature,
     topK,
+    topN,
+    entityCandidates,
+    debug = false,
     queryEnrichment,
     contextDebug = false,
 } = {}) {
     const q = String(question ?? '').trim();
     if (!q) throw new Error('Question is empty');
+    const resolvedEntityCandidates = Array.isArray(entityCandidates)
+        ? entityCandidates
+        : extractEntityCandidates(q);
 
     // optional deterministic enrichment
     const enriched = queryEnrichment
@@ -344,6 +351,9 @@ export async function ask(question, {
 
     const { context, sources } = await search(enriched, {
         topK: Number(topK ?? config.retrieval.topK),
+        topN: Number(topN ?? config.retrieval.topN),
+        entityCandidates: resolvedEntityCandidates,
+        debug: Boolean(debug),
         contextDebug: Boolean(contextDebug),
     });
 

@@ -1,5 +1,6 @@
 import { ask } from './askCore.js';
 import { config } from './core/config.js';
+import { extractEntityCandidates } from './core/entityExtract.js';
 
 async function main() {
     const args = process.argv.slice(2);
@@ -16,11 +17,17 @@ async function main() {
         : Number(config.llm.temperature);
 
     const queryEnrichment = config.query.enrichment;
+    const entityCandidates = extractEntityCandidates(question);
+    const debug = Boolean(config.eval.mode);
 
     const out = await ask(question, {
         temperature,
         topK: Number(config.retrieval.topK),
+        topN: Number(config.retrieval.topN),
+        entityCandidates,
+        debug,
         queryEnrichment,
+        contextDebug: debug,
     });
 
     console.log('\nSources:', out.sources);
