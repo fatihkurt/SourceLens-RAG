@@ -62,6 +62,11 @@ if (avgLatencyMs > thresholds.warnAvgLatencyMs) {
   warn(`avgLatencyMs high: ${avgLatencyMs}ms (>${thresholds.warnAvgLatencyMs}ms)`);
 }
 
+const fallbackUsedRate = num(report.fallbackUsedRate, 0);
+if (fallbackUsedRate > thresholds.warnFallbackUsedRate) {
+  warn(`fallbackUsedRate high: ${fallbackUsedRate} (>${thresholds.warnFallbackUsedRate})`);
+}
+
 // summarize
 if (!process.exitCode) {
   ok(`passed: hitRate=${hitRate}, preferHitRate=${preferHitRate}, errors=${errors}, confidenceViolationRate=${confViolRate}`);

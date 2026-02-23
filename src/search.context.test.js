@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildMergedContext } from './search.js';
+import { buildMergedContext, extractOperationCandidates } from './search.js';
 
 test('buildMergedContext merges hits from same source into one block in normal mode', () => {
   const hits = [
@@ -44,4 +44,9 @@ test('buildMergedContext merges hits from same source into one block in normal m
     context.indexOf('[#1] source=docs/customerrole.md') < context.indexOf('[#2] source=docs/address.md'),
     'source blocks should preserve first-seen order'
   );
+});
+
+test('extractOperationCandidates returns camelcase operation-like terms', () => {
+  const out = extractOperationCandidates('What does GetCustomer and SearchCustomers return?');
+  assert.deepEqual(out, ['GetCustomer', 'SearchCustomers']);
 });

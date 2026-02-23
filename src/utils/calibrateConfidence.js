@@ -7,6 +7,12 @@ function pickNumber(...vals) {
   return null;
 }
 
+function downshift(conf) {
+  if (conf === 'high') return 'medium';
+  if (conf === 'medium') return 'low';
+  return 'low';
+}
+
 /**
  * Normalize hit score: prefer rerank score if present, otherwise semantic score.
  * Supports both:
@@ -45,14 +51,21 @@ export function calibrateConfidenceScores({ sources, hits, context } = {}) {
   const contextLen = typeof context === 'string' ? context.length : 0;
 
   // Conservative defaults. If you tune thresholds, keep score-source logic unchanged.
-  if (top < 0.55) return 'low';
-  if (top < 0.70) return 'medium';
+  let calculatedConfidence;
+  if (top < 0.55) calculatedConfidence = 'low';
+  else if (top < 0.70) calculatedConfidence = 'medium';
+  else if (gap < 0.03) calculatedConfidence = 'medium';
+  else if (contextLen > 0 && contextLen < 300) calculatedConfidence = 'medium';
+  else calculatedConfidence = 'high';
 
-  // If model is not clearly separating top-1 from top-2, keep it medium.
-  if (gap < 0.03) return 'medium';
+  const usedFallbackInHits =
+    Array.isArray(hits) &&
+    hits.some((h) => h?.metadata?.selection_reason === 'fallback');
+  const usedFallbackInSources =
+    Array.isArray(sources) &&
+    sources.some((s) => s?.selection_reason === 'fallback' || s?.metadata?.selection_reason === 'fallback');
+  const usedFallback = usedFallbackInHits || usedFallbackInSources;
 
-  // If context is tiny, be cautious.
-  if (contextLen > 0 && contextLen < 300) return 'medium';
-
-  return 'high';
+  if (usedFallback) return downshift(calculatedConfidence);
+  return calculatedConfidence;
 }

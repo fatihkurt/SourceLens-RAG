@@ -14,7 +14,11 @@ const AnswerSchema = z.object({
     sources: z.array(z.object({
         source: z.string(),
         chunk_index: z.number(),
+        section: z.array(z.string()).optional(),
         score: z.number().optional(),
+        rerank_score: z.number().optional(),
+        rerank_reasons: z.array(z.string()).optional(),
+        selection_reason: z.enum(['strict', 'fallback']).optional(),
     })).default([]),
 });
 

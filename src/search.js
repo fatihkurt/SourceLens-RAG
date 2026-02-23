@@ -68,6 +68,129 @@ export function buildMergedContext(hits, { maxChars, debug = false } = {}) {
   return blocks.join('\n\n\n');
 }
 
+function normalizeEntity(e) {
+  return String(e ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function getFileStem(source) {
+  const file = String(source ?? '').split(/[\\/]/).pop() ?? '';
+  return file.replace(/\.md$/i, '').toLowerCase();
+}
+
+function hasEntityInText(haystack, entityCandidates) {
+  const hay = String(haystack ?? '').toLowerCase();
+  return (entityCandidates ?? []).some((e) => {
+    const ent = normalizeEntity(e);
+    if (!ent) return false;
+    const entNoSpace = ent.replace(/\s+/g, '');
+    return hay.includes(ent) || hay.includes(entNoSpace);
+  });
+}
+
+export function extractOperationCandidates(query) {
+  const q = String(query ?? '');
+  const matched = q.match(/\b[A-Z][a-z]+(?:[A-Z][a-z0-9]+)+\b/g);
+  if (!matched) return [];
+  return [...new Set(matched)].slice(0, 2);
+}
+
+/**
+ * Select hits with:
+ * - per-source cap
+ * - prefer diversity, but do not leave topK empty
+ * - if entityCandidates exist: new sources are entity-gated in strict phase
+ * - fallback phase: fill remaining slots with soft entity/operation match (still respecting per-source cap)
+ *
+ * Adds metadata flags:
+ *  - h.metadata.selection_reason = 'strict' | 'fallback'
+ */
+function selectDiversifiedHits(
+  hits,
+  { topK, maxHitsPerSource = 2, entityCandidates = [], operationCandidates = [] } = {}
+) {
+  const counts = new Map();
+  const selected = [];
+  const selectedSources = new Set();
+  const hasEntities = Array.isArray(entityCandidates) && entityCandidates.length > 0;
+  const hasOps = Array.isArray(operationCandidates) && operationCandidates.length > 0;
+
+  const canTake = (h) => {
+    const src = h?.metadata?.source ?? '';
+    const c = counts.get(src) ?? 0;
+    return c < maxHitsPerSource;
+  };
+
+  const take = (h, reason) => {
+    const src = h?.metadata?.source ?? '';
+    const c = counts.get(src) ?? 0;
+    counts.set(src, c + 1);
+    selectedSources.add(src);
+
+    // mark selection reason for later diagnostics/confidence
+    h.metadata = h.metadata ?? {};
+    h.metadata.selection_reason = reason;
+
+    selected.push(h);
+  };
+
+  const softMatch = (h) => {
+    const sectionText = Array.isArray(h?.metadata?.section) ? h.metadata.section.join(' ') : '';
+    const text = h?.metadata?.text ?? '';
+    const hay = `${getFileStem(h?.metadata?.source ?? '')}\n${sectionText}\n${text}`.toLowerCase();
+
+    if (hasEntities && hasEntityInText(hay, entityCandidates)) return true;
+
+    if (hasOps) {
+      return operationCandidates.some((op) => {
+        const candidate = String(op ?? '').toLowerCase();
+        return Boolean(candidate) && hay.includes(candidate);
+      });
+    }
+
+    return true;
+  };
+
+  // ---- Phase 1: strict (entity-gated for NEW sources)
+  for (const h of hits) {
+    if (selected.length >= topK) break;
+
+    if (!canTake(h)) continue;
+
+    const src = h?.metadata?.source ?? '';
+    const isNewSource = !selectedSources.has(src);
+
+    if (isNewSource && hasEntities) {
+      const sectionText = Array.isArray(h?.metadata?.section) ? h.metadata.section.join(' ') : '';
+      const text = h?.metadata?.text ?? '';
+      const hay = `${sectionText}\n${text}`;
+
+      if (!hasEntityInText(hay, entityCandidates)) {
+        continue; // strict skip
+      }
+    }
+
+    take(h, 'strict');
+  }
+
+  // ---- Phase 2: fallback fill (ignore entity gating, still cap per source)
+  if (selected.length < topK) {
+    for (const h of hits) {
+      if (selected.length >= topK) break;
+      if (selected.includes(h)) continue; // same object reference check is ok here
+      if (!canTake(h)) continue;
+      if (!softMatch(h)) continue;
+
+      // Allow soft-matched hit in semantic/rerank order, marked as fallback.
+      take(h, 'fallback');
+    }
+  }
+
+  return selected;
+}
+
 export async function search(
   query,
   {
@@ -86,6 +209,7 @@ export async function search(
   const resolvedEntityCandidates = Array.isArray(entityCandidates)
     ? entityCandidates
     : extractEntityCandidates(query);
+  const operationCandidates = extractOperationCandidates(query);
 
   // 1) semantic scoring
   const semantic = items
@@ -114,8 +238,13 @@ export async function search(
     deduped.push(h);
   }
 
-  // 4) final topK
-  const top = deduped.slice(0, topK);
+  // 4) source-cap + entity-aware diversify before topK
+  const top = selectDiversifiedHits(deduped, {
+    topK,
+    maxHitsPerSource: Number(config.retrieval.maxHitsPerSource),
+    entityCandidates: resolvedEntityCandidates,
+    operationCandidates,
+  });
 
   const MAX_CONTEXT_CHARS = Number(config.retrieval.maxContextChars);
   const context = buildMergedContext(top, {
@@ -125,7 +254,11 @@ export async function search(
 
   if (rerankDebug) {
     console.log('[search] entityCandidates=', resolvedEntityCandidates);
-    console.log(`[search] index_items=${items.length} topK=${topK} topN=${topN} context_chars=${context.length}`);
+    console.log('[search] operationCandidates=', operationCandidates);
+    console.log(
+      `[search] index_items=${items.length} topK=${topK} topN=${topN} ` +
+      `max_hits_per_source=${config.retrieval.maxHitsPerSource} context_chars=${context.length}`
+    );
     console.log(
       `[search] top_scores=${top.map((x) => Number((x?.rerank?.final ?? x.score ?? 0).toFixed(4))).join(', ')}`
     );
@@ -154,6 +287,7 @@ export async function search(
     ...(Number.isFinite(h.score) ? { score: Number(h.score.toFixed(4)) } : {}), // semantic score for eval/calibration
     ...(Number.isFinite(h?.rerank?.final) ? { rerank_score: Number(h.rerank.final.toFixed(4)) } : {}),
     ...(h.rerank?.reasons?.length ? { rerank_reasons: h.rerank.reasons } : {}),
+    ...(h.metadata?.selection_reason ? { selection_reason: h.metadata.selection_reason } : {}),
   }));
 
   return { sources, context, hits: top, traces };

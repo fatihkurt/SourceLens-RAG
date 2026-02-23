@@ -31,6 +31,7 @@ export const config = {
   retrieval: {
     topK: num('TOP_K', 3),
     topN: num('TOP_N', 300),
+    maxHitsPerSource: Math.max(1, Math.floor(num('MAX_HITS_PER_SOURCE', 2))),
     maxContextChars: num('MAX_CONTEXT_CHARS', 3500),
     fileDiversity: num('FILE_DIVERSITY', 1), // same file max hits (future use)
     debug: bool('DEBUG_RAG', false),
@@ -66,6 +67,7 @@ export const config = {
       maxConfidenceViolationRate: num('EVAL_GATE_MAX_CONF_VIOLATION_RATE', 0),
       warnAvgPromptTokens: num('EVAL_GATE_WARN_AVG_PROMPT_TOKENS', 650),
       warnAvgLatencyMs: num('EVAL_GATE_WARN_AVG_LATENCY_MS', 30000),
+      warnFallbackUsedRate: num('EVAL_GATE_WARN_FALLBACK_USED_RATE', 0.4),
     },
   },
 

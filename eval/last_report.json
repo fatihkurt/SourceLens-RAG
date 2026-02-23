@@ -44,14 +44,14 @@
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md",
         "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md",
-        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md",
-        "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md"
+        "data\\raw\\bingads-13\\customer-management-service\\contactinfo.md",
+        "data\\raw\\bingads-13\\customer-management-service\\accountadditionalfield.md"
       ],
       "scores": [
         0.5812,
         0.5647,
-        0.5533,
-        0.5522
+        0.579,
+        0.5747
       ],
       "must_hit_rank": 1,
       "prefer_hit": true,
@@ -92,12 +92,12 @@
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\customerrole.md",
         "data\\raw\\bingads-13\\customer-management-service\\customerrole.md",
-        "data\\raw\\bingads-13\\customer-management-service\\address.md"
+        "data\\raw\\bingads-13\\customer-management-service\\getuser.md"
       ],
       "scores": [
         0.5736,
         0.5681,
-        0.6671
+        0.5782
       ],
       "must_hit_rank": 1,
       "prefer_hit": true,
@@ -114,12 +114,12 @@
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md",
         "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md",
-        "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md"
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md"
       ],
       "scores": [
         0.6039,
         0.5734,
-        0.569
+        0.5787
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
@@ -157,13 +157,11 @@
       "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md",
-        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md",
         "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md"
       ],
       "scores": [
         0.6322,
-        0.5928,
-        0.5721
+        0.5928
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
@@ -180,12 +178,12 @@
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\searchcustomers.md",
         "data\\raw\\bingads-13\\customer-management-service\\predicateoperator.md",
-        "data\\raw\\bingads-13\\customer-management-service\\getcustomersinfo.md"
+        "data\\raw\\bingads-13\\customer-management-service\\predicate.md"
       ],
       "scores": [
         0.7217,
         0.7407,
-        0.7503
+        0.711
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
@@ -202,12 +200,12 @@
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md",
         "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md",
-        "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md"
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md"
       ],
       "scores": [
         0.6193,
         0.5918,
-        0.5414
+        0.5638
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,
@@ -224,12 +222,12 @@
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md",
         "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md",
-        "data\\raw\\bingads-13\\customer-management-service\\accounttaxcertificate.md"
+        "data\\raw\\bingads-13\\customer-management-service\\customer.md"
       ],
       "scores": [
         0.6133,
         0.5918,
-        0.6555
+        0.5629
       ],
       "must_hit_rank": 1,
       "prefer_hit": null,

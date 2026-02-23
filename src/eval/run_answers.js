@@ -18,6 +18,10 @@ function findBestRank(gotSources, needles) {
   return best; // 1-based or null
 }
 
+function formatSourceChunk(source, chunkIndex) {
+  return `${source}#${chunkIndex}`;
+}
+
 async function sleep(ms) {
   if (!ms) return;
   await new Promise((r) => setTimeout(r, ms));
@@ -45,6 +49,7 @@ async function main() {
   let totalCalls = 0;
   let errors = 0;
   let confidenceViolations = 0;
+  let fallbackUsedCount = 0;
 
   const runList = maxCases > 0 ? cases.slice(0, maxCases) : cases;
 
@@ -85,6 +90,8 @@ async function main() {
     }
 
     const gotSources = out?.sources ?? [];
+    const fallbackUsed = gotSources.some((s) => s?.selection_reason === 'fallback');
+    if (fallbackUsed) fallbackUsedCount++;
     const mustRank = expected.length ? findBestRank(gotSources, expected) : 1;
     const ok = err ? false : (expected.length ? mustRank !== null : true);
     const confidenceViolation = mustRank === null && out?.confidence === 'high';
@@ -112,8 +119,17 @@ async function main() {
       question: tc.question,
       expected_any_of: expected,
       prefer_sources: prefer,
-      got: gotSources.map((s) => `${s.source}#${s.chunk_index}`),
+      got: gotSources.map((s) => formatSourceChunk(s.source, s.chunk_index)),
+      got_details: gotSources.map((s) => ({
+        source: s.source,
+        chunk_index: s.chunk_index,
+        selection_reason: s.selection_reason ?? null,
+        score: s.score ?? null,
+        rerank_score: s.rerank_score ?? null,
+      })),
       scores: gotSources.map((s) => s.score),
+      selection_reasons: gotSources.map((s) => s.selection_reason ?? null),
+      fallback_used: fallbackUsed,
       must_hit_rank: mustRank,
       prefer_hit: prefer.length ? preferHit : null,
       prefer_hit_rank: prefer.length ? preferRank : null,
@@ -131,6 +147,7 @@ async function main() {
   const hitRate = total ? pass / total : 0;
   const preferHitRate = preferTotal ? preferHitCount / preferTotal : 0;
   const confidenceViolationRate = total ? confidenceViolations / total : 0;
+  const fallbackUsedRate = total ? fallbackUsedCount / total : 0;
 
   const summary = {
     hitRate,
@@ -141,6 +158,8 @@ async function main() {
     preferTotal,
     confidenceViolations,
     confidenceViolationRate,
+    fallbackUsedCount,
+    fallbackUsedRate,
     errors,
     avgLatencyMs: totalCalls ? Math.round(totalLatency / totalCalls) : null,
     avgPromptTokens: totalCalls ? Math.round(totalPromptTokens / totalCalls) : null,
