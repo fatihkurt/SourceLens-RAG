@@ -3,6 +3,7 @@ import { embedText } from './core/embedder.js';
 import { cosineSim } from './utils/cosineSim.js';
 import { extractEntityCandidates } from './core/entityExtract.js';
 import { rerank } from './core/rerank.js';
+import { llmRerankHits } from './core/llmRerank.js';
 import { config } from './core/config.js';
 
 export function buildMergedContext(hits, { maxChars, debug = false } = {}) {
@@ -90,6 +91,16 @@ function hasEntityInText(haystack, entityCandidates) {
   });
 }
 
+function hasOperationInText(haystack, operationCandidates) {
+  const hay = String(haystack ?? '').toLowerCase();
+  return (operationCandidates ?? []).some((op) => {
+    const candidate = normalizeEntity(op);
+    if (!candidate) return false;
+    const compact = candidate.replace(/\s+/g, '');
+    return hay.includes(candidate) || hay.includes(compact);
+  });
+}
+
 export function extractOperationCandidates(query) {
   const q = String(query ?? '');
   const matched = q.match(/\b[A-Z][a-z]+(?:[A-Z][a-z0-9]+)+\b/g);
@@ -101,21 +112,27 @@ export function extractOperationCandidates(query) {
  * Select hits with:
  * - per-source cap
  * - prefer diversity, but do not leave topK empty
- * - if entityCandidates exist: new sources are entity-gated in strict phase
- * - fallback phase: fill remaining slots with soft entity/operation match (still respecting per-source cap)
+ * - strict phase:
+ *   - if entity candidates exist: new source must match entity
+ *   - else if operation candidates exist: new source must match operation
+ * - fallback phase:
+ *   - if entity matches: fallback_entity
+ *   - else if operation matches (or no candidates): fallback_free
  *
  * Adds metadata flags:
- *  - h.metadata.selection_reason = 'strict' | 'fallback'
+ *  - h.metadata.selection_reason =
+ *    'strict_entity' | 'strict_operation' | 'fallback_entity' | 'fallback_free'
  */
-function selectDiversifiedHits(
+export function selectDiversifiedHits(
   hits,
-  { topK, maxHitsPerSource = 2, entityCandidates = [], operationCandidates = [] } = {}
+  { topK, maxHitsPerSource = 2, entityCandidates = [], operationCandidates = [], query = '' } = {}
 ) {
   const counts = new Map();
   const selected = [];
   const selectedSources = new Set();
   const hasEntities = Array.isArray(entityCandidates) && entityCandidates.length > 0;
   const hasOps = Array.isArray(operationCandidates) && operationCandidates.length > 0;
+  const operationIntent = /\b(operation|call|endpoint|method)\b/i.test(String(query));
 
   const canTake = (h) => {
     const src = h?.metadata?.source ?? '';
@@ -129,62 +146,77 @@ function selectDiversifiedHits(
     counts.set(src, c + 1);
     selectedSources.add(src);
 
-    // mark selection reason for later diagnostics/confidence
     h.metadata = h.metadata ?? {};
     h.metadata.selection_reason = reason;
 
     selected.push(h);
   };
 
-  const softMatch = (h) => {
+  const getMatchInfo = (h) => {
     const sectionText = Array.isArray(h?.metadata?.section) ? h.metadata.section.join(' ') : '';
     const text = h?.metadata?.text ?? '';
     const hay = `${getFileStem(h?.metadata?.source ?? '')}\n${sectionText}\n${text}`.toLowerCase();
-
-    if (hasEntities && hasEntityInText(hay, entityCandidates)) return true;
-
-    if (hasOps) {
-      return operationCandidates.some((op) => {
-        const candidate = String(op ?? '').toLowerCase();
-        return Boolean(candidate) && hay.includes(candidate);
-      });
-    }
-
-    return true;
+    return {
+      entity: hasEntities && hasEntityInText(hay, entityCandidates),
+      operation: hasOps && hasOperationInText(hay, operationCandidates),
+    };
   };
 
-  // ---- Phase 1: strict (entity-gated for NEW sources)
+  const softMatch = (h) => {
+    const match = getMatchInfo(h);
+    if (match.entity) return { ok: true, reason: 'fallback_entity' };
+    if (match.operation) return { ok: true, reason: 'fallback_free' };
+    if (!hasEntities && !hasOps) return { ok: true, reason: 'fallback_free' };
+    return { ok: false, reason: null };
+  };
+
+  // ---- Phase 1: strict
   for (const h of hits) {
     if (selected.length >= topK) break;
-
     if (!canTake(h)) continue;
 
     const src = h?.metadata?.source ?? '';
     const isNewSource = !selectedSources.has(src);
+    const match = getMatchInfo(h);
 
-    if (isNewSource && hasEntities) {
-      const sectionText = Array.isArray(h?.metadata?.section) ? h.metadata.section.join(' ') : '';
-      const text = h?.metadata?.text ?? '';
-      const hay = `${sectionText}\n${text}`;
-
-      if (!hasEntityInText(hay, entityCandidates)) {
-        continue; // strict skip
+    const preferOperation = operationIntent && hasOps;
+    if (isNewSource) {
+      if (preferOperation) {
+        if (!match.operation) continue;
+      } else if (hasEntities) {
+        if (!match.entity) continue;
+      } else if (hasOps) {
+        if (!match.operation) continue;
       }
     }
 
-    take(h, 'strict');
+    const strictReason =
+      (preferOperation || (!hasEntities && hasOps) || (!match.entity && match.operation))
+        ? 'strict_operation'
+        : 'strict_entity';
+    take(h, strictReason);
   }
 
-  // ---- Phase 2: fallback fill (ignore entity gating, still cap per source)
+  // ---- Phase 2: fallback fill
   if (selected.length < topK) {
     for (const h of hits) {
       if (selected.length >= topK) break;
-      if (selected.includes(h)) continue; // same object reference check is ok here
+      if (selected.includes(h)) continue;
       if (!canTake(h)) continue;
-      if (!softMatch(h)) continue;
 
-      // Allow soft-matched hit in semantic/rerank order, marked as fallback.
-      take(h, 'fallback');
+      const soft = softMatch(h);
+      if (!soft.ok) continue;
+      take(h, soft.reason);
+    }
+
+    // ---- Phase 3: hard fallback fill (guarantee topK if possible)
+    if (selected.length < topK) {
+      for (const h of hits) {
+        if (selected.length >= topK) break;
+        if (selected.includes(h)) continue;
+        if (!canTake(h)) continue;
+        take(h, 'fallback_free');
+      }
     }
   }
 
@@ -238,12 +270,36 @@ export async function search(
     deduped.push(h);
   }
 
-  // 4) source-cap + entity-aware diversify before topK
-  const top = selectDiversifiedHits(deduped, {
+  // 3.5) optional true rerank by LLM on top pool
+  let ranked = deduped;
+  let llmRerankMeta = null;
+  if (config.retrieval.llmRerankEnabled) {
+    const poolSize = Math.max(topK, Number(config.retrieval.llmRerankPool));
+    const pool = deduped.slice(0, poolSize);
+    const llm = await llmRerankHits({
+      query,
+      hits: pool,
+      topK,
+      temperature: Number(config.retrieval.llmRerankTemperature),
+      debug: rerankDebug,
+    });
+    llmRerankMeta = llm?.meta ?? null;
+
+    if (Array.isArray(llm?.reorderedTop) && llm.reorderedTop.length) {
+      const keyOf = (h) => h?.id ?? `${h?.metadata?.source ?? ''}::${h?.metadata?.chunk_index ?? ''}`;
+      const selectedKeys = new Set(llm.reorderedTop.map((h) => keyOf(h)));
+      const rest = deduped.filter((h) => !selectedKeys.has(keyOf(h)));
+      ranked = [...llm.reorderedTop, ...rest];
+    }
+  }
+
+  // 4) source-cap + entity/operation-aware diversify before topK
+  const top = selectDiversifiedHits(ranked, {
     topK,
     maxHitsPerSource: Number(config.retrieval.maxHitsPerSource),
     entityCandidates: resolvedEntityCandidates,
     operationCandidates,
+    query,
   });
 
   const MAX_CONTEXT_CHARS = Number(config.retrieval.maxContextChars);
@@ -277,6 +333,9 @@ export async function search(
 
     if (traces?.length) {
       console.log(`[search] rerank_traces=${traces.length}`);
+    }
+    if (llmRerankMeta) {
+      console.log(`[search] llm_rerank=${JSON.stringify(llmRerankMeta)}`);
     }
   }
 

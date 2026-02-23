@@ -60,10 +60,13 @@ export function calibrateConfidenceScores({ sources, hits, context } = {}) {
 
   const usedFallbackInHits =
     Array.isArray(hits) &&
-    hits.some((h) => h?.metadata?.selection_reason === 'fallback');
+    hits.some((h) => String(h?.metadata?.selection_reason ?? '').startsWith('fallback'));
   const usedFallbackInSources =
     Array.isArray(sources) &&
-    sources.some((s) => s?.selection_reason === 'fallback' || s?.metadata?.selection_reason === 'fallback');
+    sources.some((s) =>
+      String(s?.selection_reason ?? '').startsWith('fallback') ||
+      String(s?.metadata?.selection_reason ?? '').startsWith('fallback')
+    );
   const usedFallback = usedFallbackInHits || usedFallbackInSources;
 
   if (usedFallback) return downshift(calculatedConfidence);

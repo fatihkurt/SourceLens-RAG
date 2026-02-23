@@ -18,7 +18,7 @@ const AnswerSchema = z.object({
         score: z.number().optional(),
         rerank_score: z.number().optional(),
         rerank_reasons: z.array(z.string()).optional(),
-        selection_reason: z.enum(['strict', 'fallback']).optional(),
+        selection_reason: z.enum(['strict_entity', 'strict_operation', 'fallback_entity', 'fallback_free']).optional(),
     })).default([]),
 });
 

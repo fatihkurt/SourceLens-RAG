@@ -33,6 +33,9 @@ export const config = {
     topN: num('TOP_N', 300),
     maxHitsPerSource: Math.max(1, Math.floor(num('MAX_HITS_PER_SOURCE', 2))),
     maxContextChars: num('MAX_CONTEXT_CHARS', 3500),
+    llmRerankEnabled: bool('LLM_RERANK_ENABLED', false),
+    llmRerankPool: Math.max(3, Math.floor(num('LLM_RERANK_POOL', 10))),
+    llmRerankTemperature: num('LLM_RERANK_TEMPERATURE', 0),
     fileDiversity: num('FILE_DIVERSITY', 1), // same file max hits (future use)
     debug: bool('DEBUG_RAG', false),
   },

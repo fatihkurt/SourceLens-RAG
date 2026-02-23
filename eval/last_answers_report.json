@@ -7,12 +7,12 @@
   "preferTotal": 3,
   "confidenceViolations": 0,
   "confidenceViolationRate": 0,
-  "fallbackUsedCount": 0,
-  "fallbackUsedRate": 0,
+  "fallbackUsedCount": 1,
+  "fallbackUsedRate": 0.1,
   "errors": 0,
-  "avgLatencyMs": 20460,
-  "avgPromptTokens": 589,
-  "avgCompletionTokens": 164,
+  "avgLatencyMs": 21027,
+  "avgPromptTokens": 605,
+  "avgCompletionTokens": 163,
   "results": [
     {
       "id": "cm-01",
@@ -33,21 +33,21 @@
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customer.md",
           "chunk_index": 1,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.6165,
           "rerank_score": 0.7565
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md",
           "chunk_index": 6,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.6253,
           "rerank_score": 0.7453
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md",
           "chunk_index": 5,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.6253,
           "rerank_score": 0.7453
         }
@@ -58,9 +58,9 @@
         0.6253
       ],
       "selection_reasons": [
-        "strict",
-        "strict",
-        "strict"
+        "strict_entity",
+        "strict_entity",
+        "strict_entity"
       ],
       "fallback_used": false,
       "must_hit_rank": 1,
@@ -68,11 +68,11 @@
       "prefer_hit_rank": 1,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 20556,
+      "latency_ms": 20198,
       "usage": {
         "prompt_tokens": 347,
-        "completion_tokens": 264,
-        "total_tokens": 611
+        "completion_tokens": 261,
+        "total_tokens": 608
       },
       "error": null
     },
@@ -97,28 +97,28 @@
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md",
           "chunk_index": 1,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5812,
           "rerank_score": 0.6812
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\advertiseraccount.md",
           "chunk_index": 7,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5647,
           "rerank_score": 0.6647
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\contactinfo.md",
           "chunk_index": 4,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.579,
           "rerank_score": 0.599
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\accountadditionalfield.md",
           "chunk_index": 3,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5747,
           "rerank_score": 0.5947
         }
@@ -130,10 +130,10 @@
         0.5747
       ],
       "selection_reasons": [
-        "strict",
-        "strict",
-        "strict",
-        "strict"
+        "strict_entity",
+        "strict_entity",
+        "strict_entity",
+        "strict_entity"
       ],
       "fallback_used": false,
       "must_hit_rank": 1,
@@ -141,11 +141,11 @@
       "prefer_hit_rank": 1,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 27334,
+      "latency_ms": 27070,
       "usage": {
-        "prompt_tokens": 986,
-        "completion_tokens": 149,
-        "total_tokens": 1135
+        "prompt_tokens": 1004,
+        "completion_tokens": 84,
+        "total_tokens": 1088
       },
       "error": null
     },
@@ -166,21 +166,21 @@
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\clientlink.md",
           "chunk_index": 15,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.6027,
           "rerank_score": 0.7427
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\addclientlinks.md",
           "chunk_index": 6,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.6135,
           "rerank_score": 0.7335
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\searchclientlinks.md",
           "chunk_index": 6,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.6135,
           "rerank_score": 0.7335
         }
@@ -191,9 +191,9 @@
         0.6135
       ],
       "selection_reasons": [
-        "strict",
-        "strict",
-        "strict"
+        "strict_entity",
+        "strict_entity",
+        "strict_entity"
       ],
       "fallback_used": false,
       "must_hit_rank": 1,
@@ -201,7 +201,7 @@
       "prefer_hit_rank": null,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 22308,
+      "latency_ms": 25738,
       "usage": {
         "prompt_tokens": 642,
         "completion_tokens": 190,
@@ -228,21 +228,21 @@
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customerrole.md",
           "chunk_index": 4,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5736,
           "rerank_score": 0.7136
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customerrole.md",
           "chunk_index": 10,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5681,
           "rerank_score": 0.7081
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\getuser.md",
           "chunk_index": 7,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5782,
           "rerank_score": 0.5982
         }
@@ -253,9 +253,9 @@
         0.5782
       ],
       "selection_reasons": [
-        "strict",
-        "strict",
-        "strict"
+        "strict_entity",
+        "strict_entity",
+        "strict_entity"
       ],
       "fallback_used": false,
       "must_hit_rank": 1,
@@ -263,11 +263,11 @@
       "prefer_hit_rank": 1,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 19031,
+      "latency_ms": 16987,
       "usage": {
         "prompt_tokens": 640,
-        "completion_tokens": 142,
-        "total_tokens": 782
+        "completion_tokens": 100,
+        "total_tokens": 740
       },
       "error": null
     },
@@ -288,21 +288,21 @@
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md",
           "chunk_index": 8,
-          "selection_reason": "strict",
+          "selection_reason": "strict_operation",
           "score": 0.6039,
           "rerank_score": 0.7039
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\signupcustomer.md",
           "chunk_index": 3,
-          "selection_reason": "strict",
+          "selection_reason": "strict_operation",
           "score": 0.5734,
           "rerank_score": 0.6734
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customer.md",
           "chunk_index": 10,
-          "selection_reason": "strict",
+          "selection_reason": "strict_operation",
           "score": 0.5787,
           "rerank_score": 0.6187
         }
@@ -313,9 +313,9 @@
         0.5787
       ],
       "selection_reasons": [
-        "strict",
-        "strict",
-        "strict"
+        "strict_operation",
+        "strict_operation",
+        "strict_operation"
       ],
       "fallback_used": false,
       "must_hit_rank": 1,
@@ -323,7 +323,7 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 17723,
+      "latency_ms": 18065,
       "usage": {
         "prompt_tokens": 583,
         "completion_tokens": 140,
@@ -348,21 +348,21 @@
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md",
           "chunk_index": 15,
-          "selection_reason": "strict",
+          "selection_reason": "strict_operation",
           "score": 0.6182,
           "rerank_score": 0.7182
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\getcustomer.md",
           "chunk_index": 5,
-          "selection_reason": "strict",
+          "selection_reason": "strict_operation",
           "score": 0.6123,
           "rerank_score": 0.7123
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\getcustomerpilotfeatures.md",
           "chunk_index": 15,
-          "selection_reason": "strict",
+          "selection_reason": "strict_operation",
           "score": 0.6136,
           "rerank_score": 0.6936
         }
@@ -373,9 +373,9 @@
         0.6136
       ],
       "selection_reasons": [
-        "strict",
-        "strict",
-        "strict"
+        "strict_operation",
+        "strict_operation",
+        "strict_operation"
       ],
       "fallback_used": false,
       "must_hit_rank": 1,
@@ -383,11 +383,11 @@
       "prefer_hit_rank": null,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 17389,
+      "latency_ms": 17977,
       "usage": {
         "prompt_tokens": 587,
-        "completion_tokens": 133,
-        "total_tokens": 720
+        "completion_tokens": 137,
+        "total_tokens": 724
       },
       "error": null
     },
@@ -401,43 +401,53 @@
       "prefer_sources": [],
       "got": [
         "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md#15",
-        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md#14"
+        "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md#14",
+        "data\\raw\\bingads-13\\customer-management-service\\searchaccounts.md#23"
       ],
       "got_details": [
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md",
           "chunk_index": 15,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.6322,
           "rerank_score": 0.7322
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\getlinkedaccountsandcustomersinfo.md",
           "chunk_index": 14,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5928,
           "rerank_score": 0.6928
+        },
+        {
+          "source": "data\\raw\\bingads-13\\customer-management-service\\searchaccounts.md",
+          "chunk_index": 23,
+          "selection_reason": "fallback_free",
+          "score": 0.6297,
+          "rerank_score": 0.6297
         }
       ],
       "scores": [
         0.6322,
-        0.5928
+        0.5928,
+        0.6297
       ],
       "selection_reasons": [
-        "strict",
-        "strict"
+        "strict_entity",
+        "strict_entity",
+        "fallback_free"
       ],
-      "fallback_used": false,
+      "fallback_used": true,
       "must_hit_rank": 1,
       "prefer_hit": null,
       "prefer_hit_rank": null,
-      "confidence": "high",
+      "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 21278,
+      "latency_ms": 27634,
       "usage": {
-        "prompt_tokens": 502,
-        "completion_tokens": 174,
-        "total_tokens": 676
+        "prompt_tokens": 643,
+        "completion_tokens": 272,
+        "total_tokens": 915
       },
       "error": null
     },
@@ -458,21 +468,21 @@
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\searchcustomers.md",
           "chunk_index": 1,
-          "selection_reason": "strict",
+          "selection_reason": "strict_operation",
           "score": 0.7217,
           "rerank_score": 0.8217
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\predicateoperator.md",
           "chunk_index": 1,
-          "selection_reason": "strict",
+          "selection_reason": "strict_operation",
           "score": 0.7407,
           "rerank_score": 0.7607
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\predicate.md",
           "chunk_index": 11,
-          "selection_reason": "strict",
+          "selection_reason": "strict_operation",
           "score": 0.711,
           "rerank_score": 0.741
         }
@@ -483,9 +493,9 @@
         0.711
       ],
       "selection_reasons": [
-        "strict",
-        "strict",
-        "strict"
+        "strict_operation",
+        "strict_operation",
+        "strict_operation"
       ],
       "fallback_used": false,
       "must_hit_rank": 1,
@@ -493,7 +503,7 @@
       "prefer_hit_rank": null,
       "confidence": "high",
       "confidence_violation": false,
-      "latency_ms": 24537,
+      "latency_ms": 23813,
       "usage": {
         "prompt_tokens": 590,
         "completion_tokens": 194,
@@ -518,21 +528,21 @@
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md",
           "chunk_index": 1,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.6193,
           "rerank_score": 0.7593
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customerlifecyclestatus.md",
           "chunk_index": 5,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5918,
           "rerank_score": 0.7318
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customer.md",
           "chunk_index": 6,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5638,
           "rerank_score": 0.6038
         }
@@ -543,9 +553,9 @@
         0.5638
       ],
       "selection_reasons": [
-        "strict",
-        "strict",
-        "strict"
+        "strict_entity",
+        "strict_entity",
+        "strict_entity"
       ],
       "fallback_used": false,
       "must_hit_rank": 1,
@@ -553,11 +563,11 @@
       "prefer_hit_rank": null,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 20668,
+      "latency_ms": 19580,
       "usage": {
         "prompt_tokens": 507,
-        "completion_tokens": 162,
-        "total_tokens": 669
+        "completion_tokens": 157,
+        "total_tokens": 664
       },
       "error": null
     },
@@ -578,21 +588,21 @@
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md",
           "chunk_index": 1,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.6133,
           "rerank_score": 0.7533
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customerfinancialstatus.md",
           "chunk_index": 6,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5918,
           "rerank_score": 0.7318
         },
         {
           "source": "data\\raw\\bingads-13\\customer-management-service\\customer.md",
           "chunk_index": 4,
-          "selection_reason": "strict",
+          "selection_reason": "strict_entity",
           "score": 0.5629,
           "rerank_score": 0.6029
         }
@@ -603,9 +613,9 @@
         0.5629
       ],
       "selection_reasons": [
-        "strict",
-        "strict",
-        "strict"
+        "strict_entity",
+        "strict_entity",
+        "strict_entity"
       ],
       "fallback_used": false,
       "must_hit_rank": 1,
@@ -613,11 +623,11 @@
       "prefer_hit_rank": null,
       "confidence": "medium",
       "confidence_violation": false,
-      "latency_ms": 13780,
+      "latency_ms": 13208,
       "usage": {
         "prompt_tokens": 508,
-        "completion_tokens": 91,
-        "total_tokens": 599
+        "completion_tokens": 94,
+        "total_tokens": 602
       },
       "error": null
     }

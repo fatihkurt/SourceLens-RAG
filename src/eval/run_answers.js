@@ -90,7 +90,7 @@ async function main() {
     }
 
     const gotSources = out?.sources ?? [];
-    const fallbackUsed = gotSources.some((s) => s?.selection_reason === 'fallback');
+    const fallbackUsed = gotSources.some((s) => String(s?.selection_reason ?? '').startsWith('fallback'));
     if (fallbackUsed) fallbackUsedCount++;
     const mustRank = expected.length ? findBestRank(gotSources, expected) : 1;
     const ok = err ? false : (expected.length ? mustRank !== null : true);
