@@ -1,0 +1,31 @@
+# Replace @fatihkurt with your actual GitHub username/team.
+
+# Default owner
+* @fatihkurt
+
+# App entrypoints
+/src/app/ @fatihkurt
+
+# Orchestration runtime
+/src/runtime/agent/ @fatihkurt
+/src/runtime/planner/ @fatihkurt
+/src/runtime/context/ @fatihkurt
+/src/runtime/tools/ @fatihkurt
+/src/runtime/policies/ @fatihkurt
+/src/runtime/memory/ @fatihkurt
+/src/runtime/telemetry/ @fatihkurt
+
+# Tool modules
+/src/tools/ @fatihkurt
+
+# Retrieval and eval
+/src/retrieval/ @fatihkurt
+/src/eval/ @fatihkurt
+
+# Shared infra
+/src/shared/ @fatihkurt
+
+# Product/docs config
+/docs/ @fatihkurt
+/package.json @fatihkurt
+/tsconfig.json @fatihkurt
