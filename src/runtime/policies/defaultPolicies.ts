@@ -1,4 +1,4 @@
-import type { ToolCall } from '../tools/tool.js';
+import type { ToolCall } from '../tools/types.js';
 import type { ToolRegistry } from '../tools/registry.js';
 import type { PolicyDecision, PolicyViolation } from './types.js';
 import type { PolicyEngine } from './policy.js';
@@ -15,11 +15,10 @@ export class DefaultPolicyEngine implements PolicyEngine {
       return deny('tool_not_found', `Tool is not registered: ${call.tool_name}`);
     }
 
-    if (tool.risk === 'high') {
+    if (tool.manifest.risk === 'high') {
       return deny('tool_risk_high', `High-risk tool call blocked: ${call.tool_name}`);
     }
 
     return { allowed: true, violations: [] };
   }
 }
-

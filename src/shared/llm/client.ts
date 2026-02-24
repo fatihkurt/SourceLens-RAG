@@ -40,7 +40,7 @@ function extractAllowedTools(messages: LLMChatParams['messages']): string[] {
 
   const out = new Set<string>();
   for (const line of systemText.split('\n')) {
-    const match = line.match(/^\s*-\s*([a-zA-Z0-9_:-]+)\s+\(risk=/);
+    const match = line.match(/^\s*-\s*([a-zA-Z0-9_:-]+)(?:\s+\(risk=|:)/);
     if (match?.[1]) out.add(match[1]);
   }
   return [...out];

@@ -1,5 +1,5 @@
 import type { PlannerDecision } from '../planner/types.js';
-import type { ToolResult } from '../tools/tool.js';
+import type { ToolResult } from '../tools/types.js';
 import type { TraceSpan } from '../telemetry/trace.js';
 
 export type Turn = {

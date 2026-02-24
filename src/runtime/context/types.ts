@@ -1,5 +1,5 @@
 import type { MemoryItem } from '../memory/types.js';
-import type { ToolResult } from '../tools/tool.js';
+import type { ToolExecutionRecord } from '../tools/types.js';
 import type { RetrievedChunk } from '../../retrieval/retrieve.js';
 
 export type ContextBuildInput = {
@@ -7,7 +7,7 @@ export type ContextBuildInput = {
   systemPrompt: string;
   memory: MemoryItem[];
   retrieved: RetrievedChunk[];
-  toolResults: ToolResult[];
+  toolResults: ToolExecutionRecord[];
   maxChars?: number;
 };
 
@@ -19,4 +19,3 @@ export type RenderedContext = {
   memory: string;
   full: string;
 };
-

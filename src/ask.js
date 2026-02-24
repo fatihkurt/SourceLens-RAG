@@ -34,7 +34,6 @@ async function main() {
     console.log('\nAnswer:\n', out.answer);
     console.log('\nConfidence:', out.confidence);
     if (out.assumptions?.length) console.log('Assumptions:', out.assumptions);
-    console.log('\nMeta:', out.meta);
 }
 
 main().catch((e) => {

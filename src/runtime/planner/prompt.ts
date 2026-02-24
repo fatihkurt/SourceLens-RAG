@@ -1,9 +1,7 @@
 import type { ToolRegistry } from '../tools/registry.js';
 
 export function buildPlannerSystemPrompt(registry: ToolRegistry): string {
-  const toolLines = registry.list().map((tool) => {
-    return `- ${tool.name} (risk=${tool.risk}, response_is_final=${tool.responseIsFinal ? 'true' : 'false'}): ${tool.description}`;
-  });
+  const toolLines = registry.describeForPrompt();
 
   return `
 You are the planning brain for an AI orchestration runtime.
@@ -12,7 +10,7 @@ Decide either:
 2) call one tool
 
 Allowed tools:
-${toolLines.length ? toolLines.join('\n') : '- (no tools)'}
+${toolLines || '- (no tools)'}
 
 Return ONLY JSON with one of these formats:
 {

@@ -5,8 +5,8 @@ import { DefaultPolicyEngine } from '../../runtime/policies/defaultPolicies.js';
 import { Planner } from '../../runtime/planner/planner.js';
 import { ConsoleLogger } from '../../runtime/telemetry/logger.js';
 import { ToolRegistry } from '../../runtime/tools/registry.js';
-import { echoTool } from '../../runtime/tools/builtins/echo.js';
-import { httpFetchTool } from '../../runtime/tools/builtins/http_fetch.js';
+import * as echo from '../../tools/echo.js';
+import * as httpFetch from '../../tools/http_fetch.js';
 
 async function main() {
   const question = process.argv.slice(2).join(' ').trim();
@@ -16,9 +16,9 @@ async function main() {
   }
 
   const registry = new ToolRegistry();
-  registry.register(echoTool);
+  registry.register({ manifest: echo.manifest, handler: echo.handler });
   if (process.env.ENABLE_HTTP_FETCH_TOOL === '1') {
-    registry.register(httpFetchTool);
+    registry.register({ manifest: httpFetch.manifest, handler: httpFetch.handler });
   }
 
   const agent = new Agent({
@@ -40,4 +40,3 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
-

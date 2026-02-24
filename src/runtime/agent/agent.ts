@@ -6,7 +6,7 @@ import type { PolicyEngine } from '../policies/policy.js';
 import type { Planner } from '../planner/planner.js';
 import type { Logger } from '../telemetry/logger.js';
 import { TraceCollector } from '../telemetry/trace.js';
-import type { ToolResult } from '../tools/tool.js';
+import type { ToolExecutionRecord, ToolResult } from '../tools/types.js';
 import type { ToolRegistry } from '../tools/registry.js';
 import { defaultAgentLimits, type AgentLimits } from './limits.js';
 import type { AgentRunInput, AgentRunResult, Turn } from './types.js';
@@ -31,29 +31,16 @@ function detectToolIntent(userInput: string, toolNames: string[]): boolean {
   return mentionsTool && (asksToUseEn || asksToUseTr);
 }
 
-function stringifyToolResult(result: unknown): string {
-  if (typeof result === 'string') return result;
-  if (typeof result === 'number' || typeof result === 'boolean') return String(result);
-  if (result && typeof result === 'object') {
-    const obj = result as Record<string, unknown>;
-    if (typeof obj.answer === 'string') return obj.answer;
-    if (typeof obj.echoed === 'string') return obj.echoed;
-    if (typeof obj.result === 'string') return obj.result;
+function confidenceFromTools(toolCalls: ToolExecutionRecord[]): { confidence: 'low' | 'medium' | 'high'; reason: string } {
+  if (!toolCalls.length) return { confidence: 'medium', reason: 'retrieval_or_planner' };
+  return toolCalls.some((x) => x.result.ok)
+    ? { confidence: 'high', reason: 'tool_ok' }
+    : { confidence: 'medium', reason: 'tool_planner_fallback' };
+}
 
-    if (obj.result && typeof obj.result === 'object') {
-      const nested = obj.result as Record<string, unknown>;
-      if (typeof nested.answer === 'string') return nested.answer;
-      if (typeof nested.echoed === 'string') return nested.echoed;
-    }
-
-    try {
-      return JSON.stringify(result);
-    } catch {
-      return 'Tool executed successfully.';
-    }
-  }
-
-  return 'Tool executed successfully.';
+function resultToAnswer(result: ToolResult): string {
+  if (!result.ok) return 'error' in result ? result.error : 'Tool execution failed';
+  return result.content;
 }
 
 export class Agent {
@@ -90,13 +77,11 @@ export class Agent {
     }
 
     const turns: Turn[] = [];
-    const toolResults: ToolResult[] = [];
+    const toolResults: ToolExecutionRecord[] = [];
     let toolCalls = 0;
 
     for (let turn = 1; turn <= this.limits.maxTurns; turn++) {
-      if (Date.now() - startMs > this.limits.timeoutMs) {
-        break;
-      }
+      if (Date.now() - startMs > this.limits.timeoutMs) break;
 
       const buildSpan = trace.start('context.build', { turn });
       const context = this.contextBuilder.build({
@@ -134,19 +119,14 @@ export class Agent {
           createdAt: Date.now(),
         });
 
-        const usedToolInThisRun = toolCalls > 0 || toolResults.length > 0;
-        const includeSources = !usedToolInThisRun && !toolIntent && retrieval.chunks.length > 0;
-        const inferredConfidence =
-          decision.confidence ??
-          (usedToolInThisRun ? (toolResults.some((r) => r.ok) ? 'high' : 'medium') : 'medium');
-        const confidenceReason =
-          usedToolInThisRun
-            ? (toolResults.some((r) => r.ok) ? 'tool_ok' : 'tool_planner_fallback')
-            : 'retrieval_or_planner';
+        const toolConfidence = confidenceFromTools(toolResults);
+        const confidence = decision.confidence ?? toolConfidence.confidence;
+        const confidenceReason = toolConfidence.reason;
+        const includeSources = toolResults.length === 0 && !toolIntent && retrieval.chunks.length > 0;
 
         return {
           answer: decision.answer,
-          confidence: inferredConfidence,
+          confidence,
           confidence_reason: confidenceReason,
           turns,
           sources: includeSources
@@ -169,64 +149,40 @@ export class Agent {
         };
       }
 
-      if (toolCalls >= this.limits.maxToolCalls) {
-        break;
-      }
+      if (toolCalls >= this.limits.maxToolCalls) break;
       toolCalls += 1;
 
-      const policy = this.deps.policies.checkToolCall(
-        { tool_name: decision.tool_name, args: decision.args },
-        this.deps.tools
-      );
+      const call = { tool_name: decision.tool_name, args: decision.args };
+      const policy = this.deps.policies.checkToolCall(call, this.deps.tools);
       if (!policy.allowed) {
         const deniedResult: ToolResult = {
-          tool_name: decision.tool_name,
           ok: false,
           error: policy.violations.map((v) => v.message).join('; '),
+          data: { tool: decision.tool_name },
         };
         turns.push({ turn, decision, toolResult: deniedResult });
-        toolResults.push(deniedResult);
+        toolResults.push({ tool: decision.tool_name, result: deniedResult });
         continue;
       }
 
-      const tool = this.deps.tools.get(decision.tool_name);
-      if (!tool) {
-        const missingResult: ToolResult = {
-          tool_name: decision.tool_name,
-          ok: false,
-          error: `Tool not found: ${decision.tool_name}`,
-        };
+      const def = this.deps.tools.get(decision.tool_name);
+      if (!def) {
+        const missingResult: ToolResult = { ok: false, error: `Tool not found: ${decision.tool_name}` };
         turns.push({ turn, decision, toolResult: missingResult });
-        toolResults.push(missingResult);
+        toolResults.push({ tool: decision.tool_name, result: missingResult });
         continue;
       }
 
-      const toolSpan = trace.start('tool.execute', { turn, tool: tool.name });
-      let toolResult: ToolResult;
-      try {
-        const parsedArgs = tool.inputSchema.parse(decision.args);
-        const result = await tool.execute(parsedArgs, { sessionId });
-        toolResult = {
-          tool_name: tool.name,
-          ok: true,
-          result,
-        };
-      } catch (error: any) {
-        toolResult = {
-          tool_name: tool.name,
-          ok: false,
-          error: String(error?.message ?? error),
-        };
-      }
-      trace.end(toolSpan, { ok: toolResult.ok });
+      const toolSpan = trace.start('tool.execute', { turn, tool: def.manifest.name });
+      const execution = await this.deps.tools.execute(decision.tool_name, decision.args, { sessionId });
+      trace.end(toolSpan, { ok: execution.result.ok });
 
-      turns.push({ turn, decision, toolResult });
-      toolResults.push(toolResult);
-      this.deps.logger.log('info', 'tool result', { tool: tool.name, ok: toolResult.ok });
+      turns.push({ turn, decision, toolResult: execution.result });
+      toolResults.push(execution);
+      this.deps.logger.log('info', 'tool result', { tool: def.manifest.name, ok: execution.result.ok });
 
-      // Fast-path final: skip an extra planner turn for tools that are directly answerable.
-      if (tool.responseIsFinal && toolResult.ok) {
-        const answer = stringifyToolResult(toolResult.result);
+      if (def.manifest.responseIsFinal && execution.result.ok) {
+        const answer = resultToAnswer(execution.result);
         const confidenceReason = 'tool_ok';
 
         await this.deps.memory.append(sessionId, {
@@ -264,10 +220,9 @@ export class Agent {
       }
     }
 
-    const fallbackAnswer = 'I could not complete the request within the orchestration limits.';
     const confidenceReason = 'limits_exceeded';
     return {
-      answer: fallbackAnswer,
+      answer: 'I could not complete the request within the orchestration limits.',
       confidence: 'low',
       confidence_reason: confidenceReason,
       turns,
@@ -285,4 +240,3 @@ export class Agent {
     };
   }
 }
-

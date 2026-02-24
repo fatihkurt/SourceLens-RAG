@@ -1,6 +1,6 @@
 import { truncateText } from '../../shared/util/text.js';
 import type { MemoryItem } from '../memory/types.js';
-import type { ToolResult } from '../tools/tool.js';
+import type { ToolExecutionRecord } from '../tools/types.js';
 import type { RetrievedChunk } from '../../retrieval/retrieve.js';
 
 export function renderMemory(memory: MemoryItem[]): string {
@@ -11,13 +11,15 @@ export function renderMemory(memory: MemoryItem[]): string {
     .join('\n');
 }
 
-export function renderTools(results: ToolResult[]): string {
+export function renderTools(results: ToolExecutionRecord[]): string {
   if (!results.length) return '';
   return results
-    .map((r, i) => {
-      const status = r.ok ? 'ok' : 'error';
-      const body = r.ok ? JSON.stringify(r.result) : r.error;
-      return `[#${i + 1}] tool=${r.tool_name} status=${status}\n${truncateText(String(body ?? ''), 600)}`;
+    .map((entry, i) => {
+      const status = entry.result.ok ? 'ok' : 'error';
+      const body = entry.result.ok
+        ? entry.result.content
+        : ('error' in entry.result ? entry.result.error : 'Tool execution failed');
+      return `[#${i + 1}] tool=${entry.tool} status=${status}\n${truncateText(String(body ?? ''), 600)}`;
     })
     .join('\n\n');
 }
@@ -31,4 +33,3 @@ export function renderRetrieval(chunks: RetrievedChunk[]): string {
     })
     .join('\n\n');
 }
-
