@@ -22,10 +22,18 @@ export const config = {
     baseUrl: str('LLM_BASE_URL', ''),
     apiKey: str('LLM_API_KEY', ''),
     model: str('LLM_MODEL', ''),
+    mockPlanner: bool('MOCK_PLANNER', false),
     temperature: num('LLM_TEMPERATURE', 0.2),
     maxRetries: num('LLM_MAX_RETRIES', 3),
     retryBaseMs: num('LLM_RETRY_BASE_MS', 500),
     retryMaxMs: num('LLM_RETRY_MAX_MS', 10000),
+  },
+
+  planner: {
+    baseUrl: str('PLANNER_BASE_URL', str('LLM_BASE_URL', '')),
+    apiKey: str('PLANNER_API_KEY', str('LLM_API_KEY', '')),
+    model: str('PLANNER_MODEL', str('LLM_MODEL', '')),
+    temperature: num('PLANNER_TEMPERATURE', num('LLM_TEMPERATURE', 0)),
   },
 
   retrieval: {
