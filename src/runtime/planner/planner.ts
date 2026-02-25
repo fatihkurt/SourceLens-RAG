@@ -2,6 +2,7 @@ import type { LLMClient } from '../../shared/llm/types.js';
 import type { ToolRegistry } from '../tools/registry.js';
 import { buildPlannerSystemPrompt } from './prompt.js';
 import { parsePlannerDecision } from './parse.js';
+import { deterministicPreRoute } from './router.js';
 import type { PlannerDecision } from './types.js';
 
 type DecideParams = {
@@ -15,6 +16,13 @@ export class Planner {
   constructor(private readonly llm: LLMClient) {}
 
   async decide(params: DecideParams): Promise<PlannerDecision> {
+    const routed = deterministicPreRoute({
+      question: params.question,
+      context: params.context,
+      registry: params.registry,
+    });
+    if (routed) return routed;
+
     const system = buildPlannerSystemPrompt(params.registry);
     const userContent = params.context || params.question;
 
