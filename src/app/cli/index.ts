@@ -5,8 +5,7 @@ import { DefaultPolicyEngine } from '../../runtime/policies/defaultPolicies.js';
 import { Planner } from '../../runtime/planner/planner.js';
 import { ConsoleLogger } from '../../runtime/telemetry/logger.js';
 import { ToolRegistry } from '../../runtime/tools/registry.js';
-import * as echo from '../../tools/echo.js';
-import * as httpFetch from '../../tools/http_fetch.js';
+import { registerBuiltinTools } from '../../runtime/tools/builtins/index.js';
 
 async function main() {
   const question = process.argv.slice(2).join(' ').trim();
@@ -16,10 +15,7 @@ async function main() {
   }
 
   const registry = new ToolRegistry();
-  registry.register({ manifest: echo.manifest, handler: echo.handler });
-  if (process.env.ENABLE_HTTP_FETCH_TOOL === '1') {
-    registry.register({ manifest: httpFetch.manifest, handler: httpFetch.handler });
-  }
+  registerBuiltinTools(registry);
 
   const agent = new Agent({
     planner: new Planner(createLLMClient()),

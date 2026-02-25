@@ -63,12 +63,16 @@ export class ToolRegistry {
     return this.tools.get(name);
   }
 
-  list(): ToolManifest[] {
+  listManifests(): ToolManifest[] {
     return [...this.tools.values()].map((t) => t.manifest);
   }
 
+  list(): ToolManifest[] {
+    return this.listManifests();
+  }
+
   describeForPrompt(): string {
-    return this.list()
+    return this.listManifests()
       .map((m) => {
         const risk = m.risk ?? 'low';
         const schema = m.inputSchema ? JSON.stringify(m.inputSchema) : '{}';
@@ -106,4 +110,3 @@ export class ToolRegistry {
     }
   }
 }
-

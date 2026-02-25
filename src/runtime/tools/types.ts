@@ -6,6 +6,7 @@ export type ToolResult =
 
 export type ToolContext = {
   sessionId: string;
+  // ileride: logger, secrets, identity, rateLimit vb.
 };
 
 export type ToolHandler = (args: unknown, ctx: ToolContext) => Promise<ToolResult>;
