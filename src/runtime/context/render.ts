@@ -19,7 +19,12 @@ export function renderTools(results: ToolExecutionRecord[]): string {
       const body = entry.result.ok
         ? entry.result.content
         : ('error' in entry.result ? entry.result.error : 'Tool execution failed');
-      return `[#${i + 1}] tool=${entry.tool} status=${status}\n${truncateText(String(body ?? ''), 600)}`;
+      const feedbackLine = entry.feedback
+        ? `tool_error=${truncateText(JSON.stringify(entry.feedback), 1200)}`
+        : '';
+      return [`[#${i + 1}] tool=${entry.tool} status=${status}`, feedbackLine, truncateText(String(body ?? ''), 600)]
+        .filter(Boolean)
+        .join('\n');
     })
     .join('\n\n');
 }

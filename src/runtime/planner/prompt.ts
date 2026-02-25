@@ -30,6 +30,7 @@ OR
 Rules:
 - Use tools only if needed.
 - Prefer final_answer when retrieved context is sufficient.
+- If Tool Results include a tool_error JSON, correct the tool name/args on the next tool_call.
 - Never output markdown or extra text.
 `.trim();
 }

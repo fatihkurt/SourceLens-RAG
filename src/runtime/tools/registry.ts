@@ -84,7 +84,19 @@ export class ToolRegistry {
   async execute(name: string, args: unknown, ctx: ToolContext): Promise<ToolExecutionRecord> {
     const def = this.get(name);
     if (!def) {
-      return { tool: name, result: { ok: false, error: `Unknown tool: ${name}` } };
+      return {
+        tool: name,
+        result: { ok: false, error: `Unknown tool: ${name}` },
+        feedback: {
+          type: 'tool_error',
+          code: 'tool_not_found',
+          tool: name,
+          message: `Unknown tool: ${name}`,
+          retryable: true,
+          provided_args: args,
+          allowed_tools: this.listManifests().map((m) => m.name),
+        },
+      };
     }
 
     const validationError = validateAgainstSchema(args, def.manifest.inputSchema);
@@ -96,6 +108,15 @@ export class ToolRegistry {
           error: `Invalid args for ${name}: ${validationError}`,
           data: { args },
         },
+        feedback: {
+          type: 'tool_error',
+          code: 'arg_validation_failed',
+          tool: name,
+          message: `Invalid args for ${name}: ${validationError}`,
+          retryable: true,
+          provided_args: args,
+          expected_schema: def.manifest.inputSchema,
+        },
       };
     }
 
@@ -103,9 +124,18 @@ export class ToolRegistry {
       const result = await def.handler(args, ctx);
       return { tool: name, result };
     } catch (error: any) {
+      const message = String(error?.message ?? error);
       return {
         tool: name,
-        result: { ok: false, error: String(error?.message ?? error) },
+        result: { ok: false, error: message },
+        feedback: {
+          type: 'tool_error',
+          code: 'tool_execution_failed',
+          tool: name,
+          message,
+          retryable: false,
+          provided_args: args,
+        },
       };
     }
   }

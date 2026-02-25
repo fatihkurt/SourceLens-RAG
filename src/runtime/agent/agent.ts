@@ -6,7 +6,7 @@ import type { PolicyEngine } from '../policies/policy.js';
 import type { Planner } from '../planner/planner.js';
 import type { Logger } from '../telemetry/logger.js';
 import { TraceCollector } from '../telemetry/trace.js';
-import type { ToolExecutionRecord, ToolResult } from '../tools/types.js';
+import type { ToolErrorCode, ToolExecutionRecord, ToolResult } from '../tools/types.js';
 import type { ToolRegistry } from '../tools/registry.js';
 import { defaultAgentLimits, type AgentLimits } from './limits.js';
 import type { AgentRunInput, AgentRunResult, Turn } from './types.js';
@@ -41,6 +41,27 @@ function confidenceFromTools(toolCalls: ToolExecutionRecord[]): { confidence: 'l
 function resultToAnswer(result: ToolResult): string {
   if (!result.ok) return 'error' in result ? result.error : 'Tool execution failed';
   return result.content;
+}
+
+function readToolAllowlist(): string[] {
+  return String(process.env.TOOL_ALLOWLIST ?? '')
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
+function resolveAllowedTools(registry: ToolRegistry): string[] {
+  const allowlist = readToolAllowlist();
+  if (allowlist.length > 0) return allowlist;
+  return registry.list().map((t) => t.name);
+}
+
+function firstToolErrorCode(violations: Array<{ code: string }>): ToolErrorCode {
+  const code = violations[0]?.code;
+  if (code === 'tool_not_allowed') return 'tool_not_allowed';
+  if (code === 'tool_not_found') return 'tool_not_found';
+  if (code === 'tool_risk_high') return 'tool_risk_high';
+  return 'policy_blocked';
 }
 
 export class Agent {
@@ -188,21 +209,47 @@ export class Agent {
       const call = { tool_name: decision.tool_name, args: decision.args };
       const policy = this.deps.policies.checkToolCall(call, this.deps.tools);
       if (!policy.allowed) {
+        const message = policy.violations.map((v) => v.message).join('; ');
         const deniedResult: ToolResult = {
           ok: false,
-          error: policy.violations.map((v) => v.message).join('; '),
+          error: message,
           data: { tool: decision.tool_name },
         };
         turns.push({ turn, decision, toolResult: deniedResult });
-        toolResults.push({ tool: decision.tool_name, result: deniedResult });
+        toolResults.push({
+          tool: decision.tool_name,
+          result: deniedResult,
+          feedback: {
+            type: 'tool_error',
+            code: firstToolErrorCode(policy.violations),
+            tool: decision.tool_name,
+            message,
+            retryable: true,
+            provided_args: decision.args,
+            allowed_tools: resolveAllowedTools(this.deps.tools),
+          },
+        });
         continue;
       }
 
       const def = this.deps.tools.get(decision.tool_name);
       if (!def) {
-        const missingResult: ToolResult = { ok: false, error: `Tool not found: ${decision.tool_name}` };
+        const message = `Tool not found: ${decision.tool_name}`;
+        const missingResult: ToolResult = { ok: false, error: message };
         turns.push({ turn, decision, toolResult: missingResult });
-        toolResults.push({ tool: decision.tool_name, result: missingResult });
+        toolResults.push({
+          tool: decision.tool_name,
+          result: missingResult,
+          feedback: {
+            type: 'tool_error',
+            code: 'tool_not_found',
+            tool: decision.tool_name,
+            message,
+            retryable: true,
+            provided_args: decision.args,
+            allowed_tools: this.deps.tools.list().map((t) => t.name),
+          },
+        });
         continue;
       }
 
