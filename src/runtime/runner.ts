@@ -5,6 +5,8 @@ type PlannerOutput =
   | { type: 'tool_call'; tool: string; args: unknown }
   | { type: 'final_answer'; text: string; confidence?: 'low' | 'medium' | 'high' };
 
+type PlannerFinalizeOutput = { text: string; confidence?: 'low' | 'medium' | 'high' };
+
 type RunOnceResult = {
   answer: string;
   confidence: 'low' | 'medium' | 'high';
@@ -20,14 +22,21 @@ export async function runOnce(params: {
   registry: ToolRegistry;
   ctx: ToolContext;
   plannerDecide: (input: { userText: string; toolManifests: unknown }) => Promise<PlannerOutput>;
+  plannerFinalize?: (input: {
+    userText: string;
+    toolManifests: unknown;
+    tool: { name: string; args: unknown; result: ToolResult };
+  }) => Promise<PlannerFinalizeOutput>;
   userText: string;
   executeTool?: (toolName: string, args: unknown) => Promise<ToolResult>;
 }): Promise<RunOnceResult> {
   const { registry, ctx, plannerDecide, userText } = params;
 
+  const toolManifests = registry.listManifests();
+
   const decision = await plannerDecide({
     userText,
-    toolManifests: registry.listManifests(),
+    toolManifests,
   });
 
   if (decision.type === 'final_answer') {
@@ -60,6 +69,22 @@ export async function runOnce(params: {
       confidence: 'high',
       sources: [],
       meta: { toolCalls: 1, retrievalCount: 0, fastPath: true },
+    };
+  }
+
+  // Not final: ask planner to compose a final answer from the tool output.
+  if (params.plannerFinalize) {
+    const final = await params.plannerFinalize({
+      userText,
+      toolManifests,
+      tool: { name: decision.tool, args: decision.args, result: toolResult },
+    });
+
+    return {
+      answer: final.text,
+      confidence: final.confidence ?? (toolResult.ok ? 'medium' : 'low'),
+      sources: [],
+      meta: { toolCalls: 1, retrievalCount: 0, fastPath: false },
     };
   }
 
