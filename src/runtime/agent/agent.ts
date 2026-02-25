@@ -7,6 +7,7 @@ import type { Planner } from '../planner/planner.js';
 import type { Logger } from '../telemetry/logger.js';
 import { TraceCollector } from '../telemetry/trace.js';
 import type { ToolErrorCode, ToolExecutionRecord, ToolResult } from '../tools/types.js';
+import { isFinalToolResponse, toolResultToAnswer } from '../tools/semantics.js';
 import type { ToolRegistry } from '../tools/registry.js';
 import { defaultAgentLimits, type AgentLimits } from './limits.js';
 import type { AgentRunInput, AgentRunResult, Turn } from './types.js';
@@ -36,11 +37,6 @@ function confidenceFromTools(toolCalls: ToolExecutionRecord[]): { confidence: 'l
   return toolCalls.some((x) => x.result.ok)
     ? { confidence: 'high', reason: 'tool_ok' }
     : { confidence: 'medium', reason: 'tool_planner_fallback' };
-}
-
-function resultToAnswer(result: ToolResult): string {
-  if (!result.ok) return 'error' in result ? result.error : 'Tool execution failed';
-  return result.content;
 }
 
 function readToolAllowlist(): string[] {
@@ -73,28 +69,39 @@ export class Agent {
   }
 
   async run(input: AgentRunInput): Promise<AgentRunResult> {
+    const question = String(input.question ?? input.userText ?? '').trim();
+    if (!question) throw new Error('question is required');
+
     const startMs = Date.now();
     const trace = new TraceCollector();
-    const sessionId = input.sessionId ?? stableHash(`${Date.now()}:${input.question}`).slice(0, 12);
+    const sessionId = input.sessionId ?? stableHash(`${Date.now()}:${question}`).slice(0, 12);
 
     const memoryLoadSpan = trace.start('memory.load');
     const memory = await this.deps.memory.load(sessionId);
     trace.end(memoryLoadSpan, { items: memory.length });
 
-    const toolNames = this.deps.tools.list().map((t) => t.name);
-    const toolIntent = detectToolIntent(input.question, toolNames);
+    const toolNames = this.deps.tools.listManifests().map((t) => t.name);
+    const toolIntent = detectToolIntent(question, toolNames);
+    const retrievalMode = input.retrieval ?? 'auto';
+    const retrievalSkipped = retrievalMode === 'never' || (retrievalMode === 'auto' && toolIntent);
+    const retrievalReason = retrievalSkipped
+      ? retrievalMode === 'never'
+        ? 'retrieval_never'
+        : 'tool_intent'
+      : undefined;
+    const maxTurns = Math.max(1, Math.min(Number(input.maxTurns ?? this.limits.maxTurns), this.limits.maxTurns));
 
     const retrievalSpan = trace.start('retrieval.retrieve');
-    const retrieval = toolIntent
-      ? { query: input.question, context: '', chunks: [] as any[] }
-      : await retrieve(input.question, { topK: input.topK, topN: input.topN });
+    const retrieval = retrievalSkipped
+      ? { query: question, context: '', chunks: [] as any[] }
+      : await retrieve(question, { topK: input.topK, topN: input.topN });
     trace.end(retrievalSpan, {
       chunks: retrieval.chunks.length,
-      skipped: toolIntent,
-      ...(toolIntent ? { reason: 'tool_intent' } : {}),
+      skipped: retrievalSkipped,
+      ...(retrievalReason ? { reason: retrievalReason } : {}),
     });
-    if (toolIntent) {
-      this.deps.logger.log('info', 'retrieval skipped', { reason: 'tool_intent' });
+    if (retrievalSkipped) {
+      this.deps.logger.log('info', 'retrieval skipped', { reason: retrievalReason });
     }
 
     const turns: Turn[] = [];
@@ -104,12 +111,12 @@ export class Agent {
     let lastParseMode: AgentRunResult['meta']['parse_mode'] | undefined;
     let lastPlannerObservation: AgentRunResult['meta']['planner_observation'] | undefined;
 
-    for (let turn = 1; turn <= this.limits.maxTurns; turn++) {
+    for (let turn = 1; turn <= maxTurns; turn++) {
       if (Date.now() - startMs > this.limits.timeoutMs) break;
 
       const buildSpan = trace.start('context.build', { turn });
       const context = this.contextBuilder.build({
-        question: input.question,
+        question,
         systemPrompt: input.systemPrompt ?? DEFAULT_SYSTEM_PROMPT,
         memory,
         retrieved: retrieval.chunks,
@@ -119,7 +126,7 @@ export class Agent {
 
       const planSpan = trace.start('planner.decide', { turn });
       const decision = await this.deps.planner.decide({
-        question: input.question,
+        question,
         context: context.full,
         registry: this.deps.tools,
       });
@@ -158,7 +165,7 @@ export class Agent {
         await this.deps.memory.append(sessionId, {
           id: '',
           role: 'user',
-          content: input.question,
+          content: question,
           scope: 'session',
           createdAt: Date.now(),
         });
@@ -173,7 +180,7 @@ export class Agent {
         const toolConfidence = confidenceFromTools(toolResults);
         const confidence = decision.confidence ?? toolConfidence.confidence;
         const confidenceReason = toolConfidence.reason;
-        const includeSources = toolResults.length === 0 && !toolIntent && retrieval.chunks.length > 0;
+        const includeSources = toolResults.length === 0 && !retrievalSkipped && retrieval.chunks.length > 0;
 
         return {
           answer: decision.answer,
@@ -191,8 +198,8 @@ export class Agent {
             sessionId,
             toolCalls,
             retrievalCount: retrieval.chunks.length,
-            retrievalSkipped: toolIntent,
-            ...(toolIntent ? { retrievalReason: 'tool_intent' } : {}),
+            retrievalSkipped,
+            ...(retrievalReason ? { retrievalReason } : {}),
             confidence_reason: confidenceReason,
             planner_reason: plannerReason,
             parse_mode: parseMode,
@@ -247,7 +254,7 @@ export class Agent {
             message,
             retryable: true,
             provided_args: decision.args,
-            allowed_tools: this.deps.tools.list().map((t) => t.name),
+            allowed_tools: this.deps.tools.listManifests().map((t) => t.name),
           },
         });
         continue;
@@ -261,14 +268,14 @@ export class Agent {
       toolResults.push(execution);
       this.deps.logger.log('info', 'tool result', { tool: def.manifest.name, ok: execution.result.ok });
 
-      if (def.manifest.responseIsFinal && execution.result.ok) {
-        const answer = resultToAnswer(execution.result);
+      if (isFinalToolResponse(def.manifest, execution.result)) {
+        const answer = toolResultToAnswer(execution.result);
         const confidenceReason = 'tool_ok';
 
         await this.deps.memory.append(sessionId, {
           id: '',
           role: 'user',
-          content: input.question,
+          content: question,
           scope: 'session',
           createdAt: Date.now(),
         });
@@ -290,8 +297,8 @@ export class Agent {
             sessionId,
             toolCalls,
             retrievalCount: retrieval.chunks.length,
-            retrievalSkipped: toolIntent,
-            ...(toolIntent ? { retrievalReason: 'tool_intent' } : {}),
+            retrievalSkipped,
+            ...(retrievalReason ? { retrievalReason } : {}),
             confidence_reason: confidenceReason,
             planner_reason: lastPlannerReason,
             parse_mode: lastParseMode,
@@ -314,8 +321,8 @@ export class Agent {
         sessionId,
         toolCalls,
         retrievalCount: retrieval.chunks.length,
-        retrievalSkipped: toolIntent,
-        ...(toolIntent ? { retrievalReason: 'tool_intent' } : {}),
+        retrievalSkipped,
+        ...(retrievalReason ? { retrievalReason } : {}),
         confidence_reason: confidenceReason,
         planner_reason: lastPlannerReason,
         parse_mode: lastParseMode,

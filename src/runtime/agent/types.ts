@@ -9,11 +9,14 @@ export type Turn = {
 };
 
 export type AgentRunInput = {
-  question: string;
+  question?: string;
+  userText?: string;
   sessionId?: string;
   topK?: number;
   topN?: number;
   systemPrompt?: string;
+  maxTurns?: number;
+  retrieval?: 'auto' | 'always' | 'never';
 };
 
 export type AgentRunResult = {
