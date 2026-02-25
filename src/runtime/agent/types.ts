@@ -1,4 +1,4 @@
-import type { PlannerDecision } from '../planner/types.js';
+import type { PlannerDecision, PlannerObservation, PlannerParseMode } from '../planner/types.js';
 import type { ToolResult } from '../tools/types.js';
 import type { TraceSpan } from '../telemetry/trace.js';
 
@@ -29,6 +29,9 @@ export type AgentRunResult = {
     retrievalSkipped?: boolean;
     retrievalReason?: string;
     confidence_reason?: string;
+    planner_reason?: string;
+    parse_mode?: PlannerParseMode;
+    planner_observation?: PlannerObservation;
     durationMs: number;
     traces: TraceSpan[];
   };

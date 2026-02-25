@@ -79,6 +79,9 @@ export class Agent {
     const turns: Turn[] = [];
     const toolResults: ToolExecutionRecord[] = [];
     let toolCalls = 0;
+    let lastPlannerReason: string | undefined;
+    let lastParseMode: AgentRunResult['meta']['parse_mode'] | undefined;
+    let lastPlannerObservation: AgentRunResult['meta']['planner_observation'] | undefined;
 
     for (let turn = 1; turn <= this.limits.maxTurns; turn++) {
       if (Date.now() - startMs > this.limits.timeoutMs) break;
@@ -99,7 +102,34 @@ export class Agent {
         context: context.full,
         registry: this.deps.tools,
       });
-      trace.end(planSpan, { type: decision.type });
+      const plannerObservation = this.deps.planner.getLastObservation() ?? undefined;
+      const plannerReason = decision.planner_reason ?? decision.rationale;
+      const parseMode = decision.parse_mode ?? plannerObservation?.parseMode;
+      lastPlannerReason = plannerReason;
+      lastParseMode = parseMode;
+      lastPlannerObservation = plannerObservation;
+
+      trace.end(planSpan, {
+        type: decision.type,
+        parse_mode: parseMode,
+        parse_status: plannerObservation?.parseStatus,
+        latency_ms: plannerObservation?.latencyMs,
+        prompt_tokens: plannerObservation?.usage?.prompt_tokens,
+        completion_tokens: plannerObservation?.usage?.completion_tokens,
+        total_tokens: plannerObservation?.usage?.total_tokens,
+      });
+
+      this.deps.logger.log('info', 'planner observability', {
+        turn,
+        input_chars: plannerObservation?.inputChars ?? context.full.length,
+        output_type: decision.type,
+        parse_status: plannerObservation?.parseStatus ?? 'unknown',
+        parse_mode: parseMode ?? 'unknown',
+        latency_ms: plannerObservation?.latencyMs ?? null,
+        usage: plannerObservation?.usage ?? null,
+        llm_calls: plannerObservation?.llmCalls ?? null,
+        planner_reason: plannerReason ?? null,
+      });
 
       if (decision.type === 'final_answer') {
         turns.push({ turn, decision });
@@ -143,6 +173,9 @@ export class Agent {
             retrievalSkipped: toolIntent,
             ...(toolIntent ? { retrievalReason: 'tool_intent' } : {}),
             confidence_reason: confidenceReason,
+            planner_reason: plannerReason,
+            parse_mode: parseMode,
+            planner_observation: plannerObservation,
             durationMs: Date.now() - startMs,
             traces: trace.all(),
           },
@@ -213,6 +246,9 @@ export class Agent {
             retrievalSkipped: toolIntent,
             ...(toolIntent ? { retrievalReason: 'tool_intent' } : {}),
             confidence_reason: confidenceReason,
+            planner_reason: lastPlannerReason,
+            parse_mode: lastParseMode,
+            planner_observation: lastPlannerObservation,
             durationMs: Date.now() - startMs,
             traces: trace.all(),
           },
@@ -234,6 +270,9 @@ export class Agent {
         retrievalSkipped: toolIntent,
         ...(toolIntent ? { retrievalReason: 'tool_intent' } : {}),
         confidence_reason: confidenceReason,
+        planner_reason: lastPlannerReason,
+        parse_mode: lastParseMode,
+        planner_observation: lastPlannerObservation,
         durationMs: Date.now() - startMs,
         traces: trace.all(),
       },
