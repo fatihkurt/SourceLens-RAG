@@ -80,11 +80,23 @@ export const config = {
       warnAvgPromptTokens: num('EVAL_GATE_WARN_AVG_PROMPT_TOKENS', 650),
       warnAvgLatencyMs: num('EVAL_GATE_WARN_AVG_LATENCY_MS', 30000),
       warnFallbackUsedRate: num('EVAL_GATE_WARN_FALLBACK_USED_RATE', 0.4),
+      warnAbstainRate: num('EVAL_GATE_WARN_ABSTAIN_RATE', 0.5),
     },
   },
 
   answer: {
     maxWords: Math.max(10, Math.floor(num('ANSWER_MAX_WORDS', 100))),
+  },
+
+  noAnswer: {
+    enabled: bool('NO_ANSWER_GATE_ENABLED', true),
+    minTopScore: num('NO_ANSWER_MIN_TOP_SCORE', 0.55),
+    minGap: num('NO_ANSWER_MIN_GAP', 0.02),
+    minContextChars: Math.max(0, Math.floor(num('NO_ANSWER_MIN_CONTEXT_CHARS', 400))),
+    abstainOnLowConfidence: bool('NO_ANSWER_ON_LOW_CONFIDENCE', true),
+    abstainOnFallback: bool('NO_ANSWER_ON_FALLBACK', true),
+    suggestNarrowing: bool('NO_ANSWER_SUGGEST_NARROWING', true),
+    maxNearbySources: Math.max(1, Math.floor(num('NO_ANSWER_MAX_NEARBY_SOURCES', 2))),
   },
 
   cache: {

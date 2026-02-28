@@ -5,6 +5,7 @@ import { search } from './search.js';
 import { extractEntityCandidates } from './core/entityExtract.js';
 import { calibrateConfidence, minConfidence } from './core/confidence.js';
 import { config, requireLLMConfig } from './core/config.js';
+import { buildNoAnswerMessage, evaluateNoAnswerGate } from './core/noAnswerGate.js';
 
 
 const AnswerSchema = z.object({
@@ -66,6 +67,64 @@ function logPathResponse(tag, response) {
         sources_count: Array.isArray(response?.sources) ? response.sources.length : 0,
         meta: response?.meta ?? {},
     });
+}
+
+function applyNoAnswerGate({ response, sources, hits, context }) {
+    if (!config.noAnswer.enabled) {
+        return response;
+    }
+
+    const gate = evaluateNoAnswerGate(
+        {
+            sources,
+            hits,
+            context,
+            confidence: response?.confidence,
+            isTool: false,
+        },
+        {
+            minTopScore: Number(config.noAnswer.minTopScore),
+            minGap: Number(config.noAnswer.minGap),
+            minContextChars: Number(config.noAnswer.minContextChars),
+            abstainOnLowConfidence: Boolean(config.noAnswer.abstainOnLowConfidence),
+            abstainOnFallback: Boolean(config.noAnswer.abstainOnFallback),
+        }
+    );
+
+    if (!gate.abstain) {
+        response.meta = response.meta ?? {};
+        response.meta.no_answer = {
+            abstained: false,
+            reasons: [],
+            metrics: gate.metrics,
+        };
+        return response;
+    }
+
+    const abstainMessage = buildNoAnswerMessage({
+        sources,
+        reasons: gate.reasons,
+        maxNearbySources: Number(config.noAnswer.maxNearbySources),
+        withSuggestion: Boolean(config.noAnswer.suggestNarrowing),
+    });
+
+    const out = {
+        ...response,
+        answer: abstainMessage,
+        confidence: 'low',
+        assumptions: [],
+        sources,
+        meta: {
+            ...(response.meta ?? {}),
+            no_answer: {
+                abstained: true,
+                reasons: gate.reasons,
+                metrics: gate.metrics,
+            },
+        },
+    };
+
+    return out;
 }
 
 async function repairToJson({ rawText, schemaHint, temperature = 0 }) {
@@ -376,5 +435,11 @@ export async function ask(question, {
 
     out.meta = out.meta ?? {};
     out.meta.retrieval_cache = cache ?? null;
-    return out;
+
+    return applyNoAnswerGate({
+        response: out,
+        sources,
+        hits,
+        context,
+    });
 }

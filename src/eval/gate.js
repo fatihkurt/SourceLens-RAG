@@ -67,6 +67,11 @@ if (fallbackUsedRate > thresholds.warnFallbackUsedRate) {
   warn(`fallbackUsedRate high: ${fallbackUsedRate} (>${thresholds.warnFallbackUsedRate})`);
 }
 
+const abstainRate = num(report.abstainRate, 0);
+if (abstainRate > thresholds.warnAbstainRate) {
+  warn(`abstainRate high: ${abstainRate} (>${thresholds.warnAbstainRate})`);
+}
+
 // summarize
 if (!process.exitCode) {
   ok(`passed: hitRate=${hitRate}, preferHitRate=${preferHitRate}, errors=${errors}, confidenceViolationRate=${confViolRate}`);

@@ -205,3 +205,33 @@ Build a minimal, inspectable RAG loop to learn orchestration and system design.
 ### Tradeoffs
 - File cache is simple but not distributed.
 - Query cache key includes debug/entity inputs, so key space can grow quickly.
+
+## 2026-02-28 - No-answer (abstain) gate for reliability
+
+### Decisions
+- Added deterministic no-answer gate in `src/askCore.js`.
+- Implemented reusable gate logic in `src/core/noAnswerGate.js`.
+- Added configurable thresholds in `src/core/config.js` (`noAnswer` block).
+- Extended answer eval report (`src/eval/run_answers.js`) with abstain metrics:
+  - `abstainCount`
+  - `abstainRate`
+  - per-case `abstained`, `no_answer_reasons`
+
+### Abstain triggers
+- `sources.length === 0`
+- `topScore < NO_ANSWER_MIN_TOP_SCORE` (default `0.55`)
+- `topScore - secondScore < NO_ANSWER_MIN_GAP` AND short context (`NO_ANSWER_MIN_CONTEXT_CHARS`)
+- `confidence === low` (non-tool path)
+- any retrieval source selected via fallback (`selection_reason=fallback_*`) when enabled
+
+### Output behavior
+- Override answer with a safe abstain message:
+  - cannot verify with confidence
+  - shows nearby source hints
+  - optionally asks user to narrow the question
+- Force confidence to `low`.
+- Attach metadata under `meta.no_answer` with reasons + metrics.
+
+### Rationale
+- Prevent confident answers when evidence quality is weak/ambiguous.
+- Improve trust and production safety posture for OSS users.

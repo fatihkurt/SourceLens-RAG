@@ -50,6 +50,7 @@ async function main() {
   let errors = 0;
   let confidenceViolations = 0;
   let fallbackUsedCount = 0;
+  let abstainCount = 0;
   let queryCacheHits = 0;
   let queryCacheMisses = 0;
   let queryCacheSamples = 0;
@@ -101,6 +102,8 @@ async function main() {
     }
     const fallbackUsed = gotSources.some((s) => String(s?.selection_reason ?? '').startsWith('fallback'));
     if (fallbackUsed) fallbackUsedCount++;
+    const abstained = Boolean(out?.meta?.no_answer?.abstained);
+    if (abstained) abstainCount++;
     const mustRank = expected.length ? findBestRank(gotSources, expected) : 1;
     const ok = err ? false : (expected.length ? mustRank !== null : true);
     const confidenceViolation = mustRank === null && out?.confidence === 'high';
@@ -147,6 +150,8 @@ async function main() {
       latency_ms: out?.meta?.latency_ms ?? null,
       usage: out?.meta?.usage ?? null,
       query_cache_hit: typeof queryCacheHit === 'boolean' ? queryCacheHit : null,
+      abstained,
+      no_answer_reasons: Array.isArray(out?.meta?.no_answer?.reasons) ? out.meta.no_answer.reasons : [],
       error: err,
     });
 
@@ -158,6 +163,7 @@ async function main() {
   const preferHitRate = preferTotal ? preferHitCount / preferTotal : 0;
   const confidenceViolationRate = total ? confidenceViolations / total : 0;
   const fallbackUsedRate = total ? fallbackUsedCount / total : 0;
+  const abstainRate = total ? abstainCount / total : 0;
   const queryCacheHitRate = queryCacheSamples ? queryCacheHits / queryCacheSamples : null;
 
   const summary = {
@@ -171,6 +177,8 @@ async function main() {
     confidenceViolationRate,
     fallbackUsedCount,
     fallbackUsedRate,
+    abstainCount,
+    abstainRate,
     queryCacheHits,
     queryCacheMisses,
     queryCacheSamples,
