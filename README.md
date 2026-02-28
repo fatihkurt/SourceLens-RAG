@@ -4,7 +4,7 @@ Production-focused RAG core with a lightweight AI orchestration runtime (planner
 
 [![Eval Gate](https://github.com/fatihkurt/SourceLens-RAG/actions/workflows/eval-gate.yml/badge.svg)](https://github.com/fatihkurt/SourceLens-RAG/actions/workflows/eval-gate.yml)
 [![CI](https://github.com/fatihkurt/SourceLens-RAG/actions/workflows/ci.yml/badge.svg)](https://github.com/fatihkurt/SourceLens-RAG/actions/workflows/ci.yml)
-![Node](https://img.shields.io/badge/node-%3E%3D20-339933)
+![Node](https://img.shields.io/badge/node-%3E%3D24-339933)
 ![License](https://img.shields.io/badge/license-MIT-black)
 
 ## Release
@@ -123,7 +123,7 @@ Paths:
 
 ## Deterministic Builds
 
-- Node version is pinned via `.nvmrc` (`20`) and `package.json` engines.
+- Node version is pinned via `.nvmrc` (`24`) and `package.json` engines.
 - Use `npm ci` in CI/release pipelines for lockfile-consistent installs.
 
 ## Design Choices
