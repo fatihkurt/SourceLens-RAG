@@ -117,3 +117,91 @@ Build a minimal, inspectable RAG loop to learn orchestration and system design.
 - Improve maintainability and review discipline.
 - Reduce hidden cross-layer coupling.
 
+## 2026-02-25 - Planner hardening and deterministic routing
+
+### Decisions
+- Added deterministic pre-planner router for obvious tool invocations.
+- Added planner parse hardening with multi-pass strategy:
+  - direct parse
+  - JSON repair pass
+  - fail-closed fallback
+- Added planner observability payload:
+  - input size, output type, parse status/mode, latency, usage.
+- Added planner debug metadata fields to runtime output:
+  - `planner_reason`, `parse_mode`, `planner_observation`.
+
+### Rationale
+- Reduce planner flakiness from malformed JSON.
+- Cut latency/cost by bypassing LLM planner on deterministic tool directives.
+- Make regressions diagnosable from logs/reports without raw prompt dumps.
+
+## 2026-02-25 - Tool-call guardrails and structured recovery feedback
+
+### Decisions
+- Enforced tool allowlist at policy layer (`TOOL_ALLOWLIST`).
+- Standardized tool error feedback as structured `tool_error` payload:
+  - `code`, `tool`, `message`, `retryable`, `provided_args`, optional schema/allowlist.
+- Rendered `tool_error` into tool context so planner can correct next turn.
+- Extended tool registry execution to return structured validation/execution failures.
+
+### Rationale
+- Keep tool execution predictable and policy-controlled.
+- Enable clean planner recovery after arg/schema/policy errors.
+- Improve debuggability and eval visibility for tool failures.
+
+## 2026-02-25 - Runtime harness separation and single-turn controls
+
+### Decisions
+- Moved dev/test runner to `src/runtime/harness/runOnce.ts` with explicit non-production note.
+- Added backward-compat shim `src/runtime/runner.ts` to avoid import breakage.
+- Shared fast-path semantics via `src/runtime/tools/semantics.ts`.
+- Added `Agent.run` controls:
+  - `maxTurns`
+  - `retrieval: 'auto' | 'always' | 'never'`
+  - `userText` alias for `question`.
+- Added harness tests to prevent behavior drift.
+
+### Rationale
+- Keep production orchestration (`Agent.run`) and test harness roles explicit.
+- Prevent duplicated business rules across agent/harness.
+- Support deterministic single-turn/eval scenarios without forking runtime logic.
+
+## 2026-02-28 - Two-layer cache for RAG latency/cost control
+
+### Decisions
+- Added file-based embedding cache in `src/core/embedder.js`.
+- Added file-based query/result cache in `src/search.js`.
+- Added shared cache utility in `src/utils/fileCache.js`.
+- Added cache config block in `src/core/config.js`.
+- Added cache clear scripts:
+  - `npm run cache:clear`
+  - `npm run cache:clear:queries`
+  - `npm run cache:clear:embeddings`
+- Added automatic query-cache invalidation after successful ingest in `src/ingest.js`.
+
+### Cache logic
+- Embedding cache key:
+  - `sha256("${EMBED_PROVIDER}:${EMBED_MODEL}\n${normalizedText}")`
+- Embedding normalization:
+  - `trim + whitespace collapse` (no forced lowercase).
+- Embedding cache value:
+  - provider/model metadata + embedding vector.
+- Query cache key:
+  - `sha256(JSON.stringify({ query, retrieval params, debug flags, entity/operation candidates }))`
+- Query cache value:
+  - `sources + context + hits + traces`.
+- Storage:
+  - file cache under `cache/<namespace>/<prefix>/<hash>.json`.
+
+### TTL policy
+- Embedding cache TTL: optional (default `0` = no expiry).
+- Query cache TTL: enabled by default (default `600s`).
+
+### Rationale
+- Embedding cache removes repeated embedding cost during re-ingest/re-run.
+- Query cache reduces repeated retrieval+rereank latency in CLI/REST demos.
+- Explicit invalidate-on-ingest keeps query cache aligned with updated index.
+
+### Tradeoffs
+- File cache is simple but not distributed.
+- Query cache key includes debug/entity inputs, so key space can grow quickly.

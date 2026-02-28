@@ -50,6 +50,9 @@ async function main() {
   let errors = 0;
   let confidenceViolations = 0;
   let fallbackUsedCount = 0;
+  let queryCacheHits = 0;
+  let queryCacheMisses = 0;
+  let queryCacheSamples = 0;
 
   const runList = maxCases > 0 ? cases.slice(0, maxCases) : cases;
 
@@ -90,6 +93,12 @@ async function main() {
     }
 
     const gotSources = out?.sources ?? [];
+    const queryCacheHit = out?.meta?.retrieval_cache?.query_hit;
+    if (typeof queryCacheHit === 'boolean') {
+      queryCacheSamples++;
+      if (queryCacheHit) queryCacheHits++;
+      else queryCacheMisses++;
+    }
     const fallbackUsed = gotSources.some((s) => String(s?.selection_reason ?? '').startsWith('fallback'));
     if (fallbackUsed) fallbackUsedCount++;
     const mustRank = expected.length ? findBestRank(gotSources, expected) : 1;
@@ -137,6 +146,7 @@ async function main() {
       confidence_violation: confidenceViolation,
       latency_ms: out?.meta?.latency_ms ?? null,
       usage: out?.meta?.usage ?? null,
+      query_cache_hit: typeof queryCacheHit === 'boolean' ? queryCacheHit : null,
       error: err,
     });
 
@@ -148,6 +158,7 @@ async function main() {
   const preferHitRate = preferTotal ? preferHitCount / preferTotal : 0;
   const confidenceViolationRate = total ? confidenceViolations / total : 0;
   const fallbackUsedRate = total ? fallbackUsedCount / total : 0;
+  const queryCacheHitRate = queryCacheSamples ? queryCacheHits / queryCacheSamples : null;
 
   const summary = {
     hitRate,
@@ -160,6 +171,10 @@ async function main() {
     confidenceViolationRate,
     fallbackUsedCount,
     fallbackUsedRate,
+    queryCacheHits,
+    queryCacheMisses,
+    queryCacheSamples,
+    queryCacheHitRate,
     errors,
     avgLatencyMs: totalCalls ? Math.round(totalLatency / totalCalls) : null,
     avgPromptTokens: totalCalls ? Math.round(totalPromptTokens / totalCalls) : null,

@@ -70,14 +70,24 @@ async function main() {
 
   let pass = 0;
   let preferHitCount = 0;
+  let queryCacheHits = 0;
+  let queryCacheMisses = 0;
+  let queryCacheSamples = 0;
   const results = [];
 
   for (const tc of cases) {
     const topk = tc.expect?.topk ?? Number(config.retrieval.topK);
-    const { sources, hits } = await search(tc.question, {
+    const { sources, hits, cache } = await search(tc.question, {
       topK: topk,
       contextDebug: config.eval.mode,
     });
+
+    const queryCacheHit = cache?.query_hit;
+    if (typeof queryCacheHit === 'boolean') {
+      queryCacheSamples += 1;
+      if (queryCacheHit) queryCacheHits += 1;
+      else queryCacheMisses += 1;
+    }
 
     const mustAny = tc.expect?.must_include_any_of ?? tc.expect?.must_include_sources ?? [];
     const prefer = tc.expect?.prefer_sources ?? [];
@@ -97,6 +107,7 @@ async function main() {
       must_hit_rank: mustRank,
       prefer_hit: preferHit,
       prefer_hit_rank: preferRank,
+      query_cache_hit: typeof queryCacheHit === 'boolean' ? queryCacheHit : null,
     });
 
     if (ok) pass += 1;
@@ -122,6 +133,7 @@ async function main() {
   const hitRate = total ? pass / total : 0;
   const preferTotal = cases.filter((tc) => (tc.expect?.prefer_sources ?? []).length > 0).length;
   const preferHitRate = preferTotal ? preferHitCount / preferTotal : null;
+  const queryCacheHitRate = queryCacheSamples ? queryCacheHits / queryCacheSamples : null;
 
   console.log(`\nEval results: ${pass}/${total} passed (hit-rate=${hitRate.toFixed(2)})\n`);
   if (preferHitRate !== null) {
@@ -141,7 +153,23 @@ async function main() {
   const outPath = path.join(path.dirname(datasetPath), 'last_report.json');
   await fs.writeFile(
     outPath,
-    JSON.stringify({ hitRate, preferHitRate, pass, total, preferHitCount, preferTotal, results }, null, 2),
+    JSON.stringify(
+      {
+        hitRate,
+        preferHitRate,
+        pass,
+        total,
+        preferHitCount,
+        preferTotal,
+        queryCacheHits,
+        queryCacheMisses,
+        queryCacheSamples,
+        queryCacheHitRate,
+        results,
+      },
+      null,
+      2
+    ),
     'utf8'
   );
   console.log(`Wrote report: ${outPath}`);

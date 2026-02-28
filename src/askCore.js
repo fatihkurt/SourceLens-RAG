@@ -354,7 +354,7 @@ export async function ask(question, {
         ? `${q} (${queryEnrichment})`
         : q;
 
-    const { context, sources, hits } = await search(enriched, {
+    const { context, sources, hits, cache } = await search(enriched, {
         topK: Number(topK ?? config.retrieval.topK),
         topN: Number(topN ?? config.retrieval.topN),
         entityCandidates: resolvedEntityCandidates,
@@ -366,11 +366,15 @@ export async function ask(question, {
         ? Number(temperature)
         : Number(config.llm.temperature);
 
-    return llmChat({
+    const out = await llmChat({
         question: q,
         context,
         sources,
         hits,
         temperature: temp,
     });
+
+    out.meta = out.meta ?? {};
+    out.meta.retrieval_cache = cache ?? null;
+    return out;
 }

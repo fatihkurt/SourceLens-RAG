@@ -14,7 +14,10 @@
     "typecheck": "tsc --noEmit",
     "cli:ts": "tsx src/app/cli/index.ts",
     "server:ts": "tsx src/app/server/index.ts",
-    "eval:ts": "tsx src/eval/run_eval.ts src/eval/datasets/cm.json"
+    "eval:ts": "tsx src/eval/run_eval.ts src/eval/datasets/cm.json",
+    "cache:clear": "node ./src/scripts/clearCache.js",
+    "cache:clear:queries": "node ./src/scripts/clearCache.js queries",
+    "cache:clear:embeddings": "node ./src/scripts/clearCache.js embeddings"
   },
   "dependencies": {
     "dotenv": "^17.3.1",

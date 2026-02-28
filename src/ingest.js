@@ -5,6 +5,7 @@ import { chunkMarkdown } from './core/chunker.js';
 import { embedText } from './core/embedder.js';
 import { appendMany, getDefaultIndexPath } from './core/vectorstore.js';
 import { config } from './core/config.js';
+import { clearJsonCacheNamespace } from './utils/fileCache.js';
 
 async function listFiles(dir) {
     const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -80,6 +81,14 @@ async function main() {
 
         await appendMany(items);
         console.log(`Ingested ${rel}: ${chunks.length} chunks`);
+    }
+
+    if (totalChunks > 0 && config.cache.enabled && config.cache.queryEnabled) {
+        await clearJsonCacheNamespace({
+            baseDir: config.cache.dir,
+            namespace: 'queries',
+        });
+        console.log(`[cache] invalidated query cache after ingest: ${config.cache.dir}`);
     }
 
     console.log(`Done. Total chunks embedded: ${totalChunks}`);

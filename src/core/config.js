@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import path from 'node:path';
 
 function num(name, def) {
   const v = process.env[name];
@@ -84,6 +85,15 @@ export const config = {
 
   answer: {
     maxWords: Math.max(10, Math.floor(num('ANSWER_MAX_WORDS', 100))),
+  },
+
+  cache: {
+    enabled: bool('CACHE_ENABLED', true),
+    dir: str('CACHE_DIR', path.join(process.cwd(), 'cache')),
+    embeddingEnabled: bool('EMBED_CACHE_ENABLED', true),
+    embeddingTtlSec: Math.max(0, Math.floor(num('EMBED_CACHE_TTL_SEC', 0))),
+    queryEnabled: bool('QUERY_CACHE_ENABLED', true),
+    queryTtlSec: Math.max(0, Math.floor(num('QUERY_CACHE_TTL_SEC', 600))),
   },
 };
 

@@ -5,6 +5,7 @@ import { extractEntityCandidates } from './core/entityExtract.js';
 import { rerank } from './core/rerank.js';
 import { llmRerankHits } from './core/llmRerank.js';
 import { config } from './core/config.js';
+import { normalizeCacheText, readJsonCache, sha256Hex, writeJsonCache } from './utils/fileCache.js';
 
 export function buildMergedContext(hits, { maxChars, debug = false } = {}) {
   const order = [];
@@ -106,6 +107,21 @@ export function extractOperationCandidates(query) {
   const matched = q.match(/\b[A-Z][a-z]+(?:[A-Z][a-z0-9]+)+\b/g);
   if (!matched) return [];
   return [...new Set(matched)].slice(0, 2);
+}
+
+function toCacheHit(h) {
+  return {
+    ...(h?.id ? { id: h.id } : {}),
+    ...(Number.isFinite(h?.score) ? { score: Number(h.score) } : {}),
+    ...(h?.rerank ? { rerank: h.rerank } : {}),
+    metadata: {
+      source: h?.metadata?.source,
+      chunk_index: h?.metadata?.chunk_index,
+      ...(Array.isArray(h?.metadata?.section) ? { section: h.metadata.section } : {}),
+      text: h?.metadata?.text ?? '',
+      ...(h?.metadata?.selection_reason ? { selection_reason: h.metadata.selection_reason } : {}),
+    },
+  };
 }
 
 /**
@@ -233,15 +249,68 @@ export async function search(
     contextDebug = false,
   } = {}
 ) {
-  console.log('[search] query', query);
+  const q = String(query ?? '');
+  console.log('[search] query', q);
 
-  const qvec = await embedText(query);
-  const items = await readAll();
+  const resolvedTopK = Number(topK);
+  const resolvedTopN = Number(topN);
+  const rerankDebug = Boolean(debug || config.retrieval.debug);
+  const resolvedContextDebug = Boolean(contextDebug || rerankDebug);
 
   const resolvedEntityCandidates = Array.isArray(entityCandidates)
     ? entityCandidates
-    : extractEntityCandidates(query);
-  const operationCandidates = extractOperationCandidates(query);
+    : extractEntityCandidates(q);
+  const operationCandidates = extractOperationCandidates(q);
+
+  const queryCacheEnabled = config.cache.enabled && config.cache.queryEnabled;
+  const queryCacheKey = sha256Hex(
+    JSON.stringify({
+      query: normalizeCacheText(q),
+      retrieval: {
+        topK: resolvedTopK,
+        topN: resolvedTopN,
+        maxHitsPerSource: Number(config.retrieval.maxHitsPerSource),
+        maxContextChars: Number(config.retrieval.maxContextChars),
+        llmRerankEnabled: Boolean(config.retrieval.llmRerankEnabled),
+        llmRerankPool: Number(config.retrieval.llmRerankPool),
+        llmRerankTemperature: Number(config.retrieval.llmRerankTemperature),
+      },
+      flags: {
+        debug: rerankDebug,
+        contextDebug: resolvedContextDebug,
+      },
+      entityCandidates: resolvedEntityCandidates,
+      operationCandidates,
+    })
+  );
+
+  if (queryCacheEnabled) {
+    const cached = await readJsonCache({
+      baseDir: config.cache.dir,
+      namespace: 'queries',
+      key: queryCacheKey,
+      ttlMs: Number(config.cache.queryTtlSec) * 1000,
+    });
+
+    if (cached.hit && cached.value) {
+      if (rerankDebug) {
+        console.log('[search] query_cache=hit');
+      }
+      return {
+        sources: Array.isArray(cached.value.sources) ? cached.value.sources : [],
+        context: String(cached.value.context ?? ''),
+        hits: Array.isArray(cached.value.hits) ? cached.value.hits : [],
+        traces: Array.isArray(cached.value.traces) ? cached.value.traces : [],
+        cache: {
+          query_enabled: true,
+          query_hit: true,
+        },
+      };
+    }
+  }
+
+  const qvec = await embedText(q);
+  const items = await readAll();
 
   // 1) semantic scoring
   const semantic = items
@@ -250,12 +319,11 @@ export async function search(
       score: cosineSim(qvec, it.vector),
     }))
     .sort((a, b) => b.score - a.score)
-    .slice(0, Math.max(topK, topN));
+    .slice(0, Math.max(resolvedTopK, resolvedTopN));
 
   // 2) rerank
-  const rerankDebug = Boolean(debug || config.retrieval.debug);
   const { reranked, traces } = rerank(semantic, {
-    query,
+    query: q,
     entityCandidates: resolvedEntityCandidates,
     debug: rerankDebug,
   });
@@ -274,12 +342,12 @@ export async function search(
   let ranked = deduped;
   let llmRerankMeta = null;
   if (config.retrieval.llmRerankEnabled) {
-    const poolSize = Math.max(topK, Number(config.retrieval.llmRerankPool));
+    const poolSize = Math.max(resolvedTopK, Number(config.retrieval.llmRerankPool));
     const pool = deduped.slice(0, poolSize);
     const llm = await llmRerankHits({
-      query,
+      query: q,
       hits: pool,
-      topK,
+      topK: resolvedTopK,
       temperature: Number(config.retrieval.llmRerankTemperature),
       debug: rerankDebug,
     });
@@ -295,11 +363,11 @@ export async function search(
 
   // 4) source-cap + entity/operation-aware diversify before topK
   const top = selectDiversifiedHits(ranked, {
-    topK,
+    topK: resolvedTopK,
     maxHitsPerSource: Number(config.retrieval.maxHitsPerSource),
     entityCandidates: resolvedEntityCandidates,
     operationCandidates,
-    query,
+    query: q,
   });
 
   const MAX_CONTEXT_CHARS = Number(config.retrieval.maxContextChars);
@@ -309,10 +377,11 @@ export async function search(
   });
 
   if (rerankDebug) {
+    console.log('[search] query_cache=miss');
     console.log('[search] entityCandidates=', resolvedEntityCandidates);
     console.log('[search] operationCandidates=', operationCandidates);
     console.log(
-      `[search] index_items=${items.length} topK=${topK} topN=${topN} ` +
+      `[search] index_items=${items.length} topK=${resolvedTopK} topN=${resolvedTopN} ` +
       `max_hits_per_source=${config.retrieval.maxHitsPerSource} context_chars=${context.length}`
     );
     console.log(
@@ -349,5 +418,28 @@ export async function search(
     ...(h.metadata?.selection_reason ? { selection_reason: h.metadata.selection_reason } : {}),
   }));
 
-  return { sources, context, hits: top, traces };
+  if (queryCacheEnabled) {
+    await writeJsonCache({
+      baseDir: config.cache.dir,
+      namespace: 'queries',
+      key: queryCacheKey,
+      value: {
+        sources,
+        context,
+        hits: top.map(toCacheHit),
+        traces,
+      },
+    });
+  }
+
+  return {
+    sources,
+    context,
+    hits: top,
+    traces,
+    cache: {
+      query_enabled: Boolean(queryCacheEnabled),
+      query_hit: false,
+    },
+  };
 }

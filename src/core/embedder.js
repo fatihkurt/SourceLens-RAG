@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { retryWithBackoff } from '../utils/retryWithBackoff.js';
 import { parseRetryAfterMs } from '../utils/retryWithBackoff.js';
 import { config } from './config.js';
+import { normalizeCacheText, readJsonCache, sha256Hex, writeJsonCache } from '../utils/fileCache.js';
 
 const EmbeddingVecSchema = z.array(z.number()).min(2);
 
@@ -71,10 +72,48 @@ async function embedWithOpenAI(text) {
 }
 
 export async function embedText(text) {
+  const normalizedText = normalizeCacheText(text);
+  const modelKey = `${config.embed.provider}:${config.embed.model}`;
+  const cacheKey = sha256Hex(`${modelKey}\n${normalizedText}`);
+  const cacheEnabled = config.cache.enabled && config.cache.embeddingEnabled;
+
+  if (cacheEnabled) {
+    const ttlMs = Number(config.cache.embeddingTtlSec) > 0 ? Number(config.cache.embeddingTtlSec) * 1000 : 0;
+    const cached = await readJsonCache({
+      baseDir: config.cache.dir,
+      namespace: 'embeddings',
+      key: cacheKey,
+      ttlMs,
+    });
+
+    if (cached.hit && Array.isArray(cached.value?.embedding)) {
+      try {
+        return EmbeddingVecSchema.parse(cached.value.embedding);
+      } catch {
+        // ignore invalid cache payload and recompute
+      }
+    }
+  }
+
   const provider = config.embed.provider;
+  let vector;
 
-  if (provider === 'ollama') return embedWithOllama(text);
-  if (provider === 'openai') return embedWithOpenAI(text);
+  if (provider === 'ollama') vector = await embedWithOllama(normalizedText);
+  else if (provider === 'openai') vector = await embedWithOpenAI(normalizedText);
+  else throw new Error(`Unknown EMBED_PROVIDER: ${provider} (use "ollama" or "openai")`);
 
-  throw new Error(`Unknown EMBED_PROVIDER: ${provider} (use "ollama" or "openai")`);
+  if (cacheEnabled) {
+    await writeJsonCache({
+      baseDir: config.cache.dir,
+      namespace: 'embeddings',
+      key: cacheKey,
+      value: {
+        provider: config.embed.provider,
+        model: config.embed.model,
+        embedding: vector,
+      },
+    });
+  }
+
+  return vector;
 }
