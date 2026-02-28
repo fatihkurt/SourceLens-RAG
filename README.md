@@ -7,6 +7,11 @@ Production-focused RAG core with a lightweight AI orchestration runtime (planner
 ![Node](https://img.shields.io/badge/node-%3E%3D20-339933)
 ![License](https://img.shields.io/badge/license-MIT-black)
 
+## Release
+
+- Current stable release: `v1.0.0`
+- Repository: `https://github.com/fatihkurt/SourceLens-RAG`
+
 ## What It Includes
 
 - Retrieval pipeline with semantic scoring, rerank, source-cap, and diversified selection.
@@ -100,10 +105,26 @@ High-impact knobs:
 - No-answer safety: `NO_ANSWER_MIN_TOP_SCORE`, `NO_ANSWER_MIN_GAP`, `NO_ANSWER_MIN_CONTEXT_CHARS`
 - Cache behavior: `CACHE_ENABLED`, `EMBED_CACHE_ENABLED`, `QUERY_CACHE_ENABLED`, `QUERY_CACHE_TTL_SEC`
 
+Safe defaults table:
+
+| Key | Default | Effect | Risk if too high/low |
+|---|---:|---|---|
+| `TOP_K` | `3` | Number of final chunks sent to answer stage | Too high: token cost/noise. Too low: misses evidence |
+| `MAX_HITS_PER_SOURCE` | `2` | Per-source diversity cap | Too high: context dominated by one file |
+| `MAX_CONTEXT_CHARS` | `3500` | Context size bound | Too high: latency/cost. Too low: missing details |
+| `NO_ANSWER_MIN_TOP_SCORE` | `0.55` | Abstain threshold for weak top hit | Too high: over-abstain. Too low: hallucination risk |
+| `NO_ANSWER_MIN_GAP` | `0.02` | Ambiguity threshold between top hits | Too low: false confidence |
+| `QUERY_CACHE_TTL_SEC` | `600` | Query cache lifetime | Too high: stale retrieval reuse |
+
 Paths:
 - Cache root: `CACHE_DIR` (default `./cache`)
 - Index manifest: `data/index/index_manifest.json`
 - Active index vectors: `data/index/index_<id>/vectors.jsonl`
+
+## Deterministic Builds
+
+- Node version is pinned via `.nvmrc` (`20`) and `package.json` engines.
+- Use `npm ci` in CI/release pipelines for lockfile-consistent installs.
 
 ## Design Choices
 
@@ -122,6 +143,7 @@ Paths:
 - Decisions and changelog notes: `docs/decision-log.md`
 - Contribution guide: `CONTRIBUTING.md`
 - Code of conduct: `CODE_OF_CONDUCT.md`
+- Security policy: `SECURITY.md`
 
 ## Security Notes
 
