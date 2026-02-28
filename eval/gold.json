@@ -63,5 +63,125 @@
     "id": "cm-10",
     "question": "What is CustomerFinancialStatus?",
     "expect": { "must_include_sources": ["customer-management-service/customerfinancialstatus.md"], "topk": 3 }
+  },
+  {
+    "id": "cm-11",
+    "question": "What does the AddAccount operation do?",
+    "expect": {
+      "must_include_any_of": [
+        "customer-management-service/addaccount.md",
+        "customer-management-service/customer-management-service-operations.md"
+      ],
+      "prefer_sources": ["customer-management-service/addaccount.md"],
+      "topk": 4
+    }
+  },
+  {
+    "id": "cm-12",
+    "question": "What is returned by GetAccount?",
+    "expect": {
+      "must_include_any_of": [
+        "customer-management-service/getaccount.md",
+        "customer-management-service/customer-management-service-operations.md"
+      ],
+      "prefer_sources": ["customer-management-service/getaccount.md"],
+      "topk": 4
+    }
+  },
+  {
+    "id": "cm-13",
+    "question": "How do you search for accounts? (SearchAccounts operation)",
+    "expect": {
+      "must_include_any_of": [
+        "customer-management-service/searchaccounts.md",
+        "customer-management-service/customer-management-service-operations.md"
+      ],
+      "prefer_sources": ["customer-management-service/searchaccounts.md"],
+      "topk": 4
+    }
+  },
+  {
+    "id": "cm-14",
+    "question": "What does the DeleteCustomer operation do?",
+    "expect": {
+      "must_include_any_of": [
+        "customer-management-service/deletecustomer.md",
+        "customer-management-service/customer-management-service-operations.md"
+      ],
+      "prefer_sources": ["customer-management-service/deletecustomer.md"],
+      "topk": 4
+    }
+  },
+  {
+    "id": "cm-15",
+    "question": "What does the UpdateCustomer operation update?",
+    "expect": {
+      "must_include_any_of": [
+        "customer-management-service/updatecustomer.md",
+        "customer-management-service/customer-management-service-operations.md"
+      ],
+      "prefer_sources": ["customer-management-service/updatecustomer.md"],
+      "topk": 4
+    }
+  },
+  {
+    "id": "cm-16",
+    "question": "What does GetUsersInfo return?",
+    "expect": {
+      "must_include_any_of": [
+        "customer-management-service/getusersinfo.md",
+        "customer-management-service/customer-management-service-operations.md"
+      ],
+      "prefer_sources": ["customer-management-service/getusersinfo.md"],
+      "topk": 4
+    }
+  },
+  {
+    "id": "cm-17",
+    "question": "What is ApiFault in the Customer Management Service?",
+    "expect": {
+      "must_include_any_of": [
+        "customer-management-service/apifault.md",
+        "customer-management-service/customer-management-data-objects.md"
+      ],
+      "prefer_sources": ["customer-management-service/apifault.md"],
+      "topk": 4
+    }
+  },
+  {
+    "id": "cm-18",
+    "question": "What is ContactInfo and what is it used for?",
+    "expect": {
+      "must_include_any_of": [
+        "customer-management-service/contactinfo.md",
+        "customer-management-service/customer-management-data-objects.md"
+      ],
+      "prefer_sources": ["customer-management-service/contactinfo.md"],
+      "topk": 4
+    }
+  },
+  {
+    "id": "cm-19",
+    "question": "What is UserLifeCycleStatus?",
+    "expect": {
+      "must_include_any_of": [
+        "customer-management-service/userlifecyclestatus.md",
+        "customer-management-service/customer-management-value-sets.md"
+      ],
+      "prefer_sources": ["customer-management-service/userlifecyclestatus.md"],
+      "topk": 4
+    }
+  },
+  {
+    "id": "cm-20",
+    "question": "What does ValidateAddress do?",
+    "expect": {
+      "must_include_any_of": [
+        "customer-management-service/validateaddress.md",
+        "customer-management-service/customer-management-service-operations.md"
+      ],
+      "prefer_sources": ["customer-management-service/validateaddress.md"],
+      "topk": 4
+    }
   }
 ]

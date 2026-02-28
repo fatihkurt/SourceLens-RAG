@@ -2,6 +2,10 @@
 
 Production-focused RAG core with a lightweight AI orchestration runtime (planner + tools + policies + eval gates).
 
+![Eval](https://img.shields.io/badge/eval-npm%20run%20eval-blue)
+![Node](https://img.shields.io/badge/node-%3E%3D20-339933)
+![License](https://img.shields.io/badge/license-MIT-black)
+
 ## What It Includes
 
 - Retrieval pipeline with semantic scoring, rerank, source-cap, and diversified selection.
@@ -90,12 +94,32 @@ Use `.env.example` as reference. Key groups:
 - cache
 - eval + gate thresholds
 
+High-impact knobs:
+- Retrieval quality/cost: `TOP_K`, `TOP_N`, `MAX_HITS_PER_SOURCE`, `MAX_CONTEXT_CHARS`
+- No-answer safety: `NO_ANSWER_MIN_TOP_SCORE`, `NO_ANSWER_MIN_GAP`, `NO_ANSWER_MIN_CONTEXT_CHARS`
+- Cache behavior: `CACHE_ENABLED`, `EMBED_CACHE_ENABLED`, `QUERY_CACHE_ENABLED`, `QUERY_CACHE_TTL_SEC`
+
+Paths:
+- Cache root: `CACHE_DIR` (default `./cache`)
+- Index manifest: `data/index/index_manifest.json`
+- Active index vectors: `data/index/index_<id>/vectors.jsonl`
+
+## Design Choices
+
+- Source cap (`MAX_HITS_PER_SOURCE`):
+  prevents one document from dominating context and reduces token waste.
+- Confidence calibration:
+  combines model confidence with retrieval signal quality (scores/gaps/context).
+- No-answer gate:
+  abstains when evidence is weak, ambiguous, or fallback-heavy to reduce hallucinations.
+
 ## Project Docs
 
 - Architecture: `docs/architecture.md`
 - Critical checks: `docs/critical-flow-tests.md`
 - Decisions and changelog notes: `docs/decision-log.md`
 - Contribution guide: `CONTRIBUTING.md`
+- Code of conduct: `CODE_OF_CONDUCT.md`
 
 ## Security Notes
 
