@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "activeIndexId": "1772266077055_fq0fh4",
+  "indexes": [
+    {
+      "id": "1772266077055_fq0fh4",
+      "createdAt": "2026-02-28T08:09:14.075Z",
+      "vectorsPath": "C:\\Users\\fatihk\\Workspace\\SourceLens\\data\\index\\index_1772266077055_fq0fh4\\vectors.jsonl",
+      "docsetHash": "9619999ed087a8dbd819175a3c366fc028c8b6757e22ca079ddfe6d0a4067a71",
+      "embeddingModel": "ollama:nomic-embed-text",
+      "chunkerVersion": "chunker:900/180",
+      "docCount": 81,
+      "chunkCount": 1040
+    }
+  ],
+  "updatedAt": "2026-02-28T08:09:14.075Z"
+}

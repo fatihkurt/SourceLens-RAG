@@ -235,3 +235,29 @@ Build a minimal, inspectable RAG loop to learn orchestration and system design.
 ### Rationale
 - Prevent confident answers when evidence quality is weak/ambiguous.
 - Improve trust and production safety posture for OSS users.
+
+## 2026-02-28 - Index lifecycle (minimum versioned model)
+
+### Decisions
+- Added index manifest file at `data/index/index_manifest.json` with:
+  - `activeIndexId`
+  - `indexes[]` metadata (`id`, `createdAt`, `docsetHash`, `embeddingModel`, `chunkerVersion`, counts, path).
+- Added docset fingerprinting:
+  - hash over `relative path + size + mtime + chunkerVersion`.
+- Added idempotent ingest behavior:
+  - if same `docsetHash + embeddingModel + chunkerVersion` exists, skip rebuild.
+- Added versioned index output:
+  - new ingest writes to `data/index/index_<id>/vectors.jsonl`.
+- Added blue/green style activation:
+  - only switch `activeIndexId` after successful ingest.
+  - on ingest failure, active index remains unchanged.
+- Added rollback/status scripts:
+  - `npm run index:status`
+  - `npm run index:rollback -- <indexId>`
+  - `npm run index:rebuild`
+- Added active index awareness in query-cache key (`index_id`) to avoid stale cache reuse.
+
+### Rationale
+- Avoid duplicate index growth on repeated ingest of unchanged documents.
+- Support fast rollback after bad ingest.
+- Keep retrieval online while rebuilding a new index version.

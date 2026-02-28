@@ -1,4 +1,4 @@
-import { readAll } from './core/vectorstore.js';
+import { getActiveIndexInfo, readAll } from './core/vectorstore.js';
 import { embedText } from './core/embedder.js';
 import { cosineSim } from './utils/cosineSim.js';
 import { extractEntityCandidates } from './core/entityExtract.js';
@@ -261,11 +261,15 @@ export async function search(
     ? entityCandidates
     : extractEntityCandidates(q);
   const operationCandidates = extractOperationCandidates(q);
+  const activeIndex = await getActiveIndexInfo();
 
   const queryCacheEnabled = config.cache.enabled && config.cache.queryEnabled;
   const queryCacheKey = sha256Hex(
     JSON.stringify({
       query: normalizeCacheText(q),
+      index: {
+        id: activeIndex?.id ?? null,
+      },
       retrieval: {
         topK: resolvedTopK,
         topN: resolvedTopN,
@@ -304,13 +308,16 @@ export async function search(
         cache: {
           query_enabled: true,
           query_hit: true,
+          index_id: activeIndex?.id ?? null,
         },
       };
     }
   }
 
   const qvec = await embedText(q);
-  const items = await readAll();
+  const items = await readAll({
+    indexPath: activeIndex?.path,
+  });
 
   // 1) semantic scoring
   const semantic = items
@@ -440,6 +447,7 @@ export async function search(
     cache: {
       query_enabled: Boolean(queryCacheEnabled),
       query_hit: false,
+      index_id: activeIndex?.id ?? null,
     },
   };
 }
