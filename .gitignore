@@ -1,2 +1,23 @@
-node_modules
-cache
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# local env / secrets
+.env
+.env.*
+!.env.example
+
+# runtime artifacts
+cache/
+data/index/
+
+# eval artifacts
+eval/last_report.json
+eval/last_answers_report.json
+eval/last_report_.json
+eval/last_answers_report_.json
+
+# logs / os
+*.log
+.DS_Store
