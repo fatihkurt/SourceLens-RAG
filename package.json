@@ -7,12 +7,12 @@
   "author": "Fatih Kurt",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fatihkurt/SourceLens.git"
+    "url": "git+https://github.com/fatihkurt/SourceLens-RAG.git"
   },
   "bugs": {
-    "url": "https://github.com/fatihkurt/SourceLens/issues"
+    "url": "https://github.com/fatihkurt/SourceLens-RAG/issues"
   },
-  "homepage": "https://github.com/fatihkurt/SourceLens#readme",
+  "homepage": "https://github.com/fatihkurt/SourceLens-RAG#readme",
   "type": "module",
   "main": "src/app/cli/index.ts",
   "files": [

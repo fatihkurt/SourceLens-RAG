@@ -1,4 +1,4 @@
-# SourceLens Architecture
+# SourceLens-RAG Architecture
 
 ## Goal
 Keep the codebase easy to reason about by enforcing clear module boundaries, explicit contracts, and small changes.
@@ -79,4 +79,3 @@ When changing a contract:
 2. Avoid hidden env logic deep in functions.
 3. Add tests for every new orchestration branch.
 4. Do not mix refactor + feature + behavior change unless required.
-

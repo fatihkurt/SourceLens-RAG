@@ -2,8 +2,8 @@
 
 Production-focused RAG core with a lightweight AI orchestration runtime (planner + tools + policies + eval gates).
 
-[![Eval Gate](https://github.com/fatihkurt/SourceLens/actions/workflows/eval-gate.yml/badge.svg)](https://github.com/fatihkurt/SourceLens/actions/workflows/eval-gate.yml)
-[![CI](https://github.com/fatihkurt/SourceLens/actions/workflows/ci.yml/badge.svg)](https://github.com/fatihkurt/SourceLens/actions/workflows/ci.yml)
+[![Eval Gate](https://github.com/fatihkurt/SourceLens-RAG/actions/workflows/eval-gate.yml/badge.svg)](https://github.com/fatihkurt/SourceLens-RAG/actions/workflows/eval-gate.yml)
+[![CI](https://github.com/fatihkurt/SourceLens-RAG/actions/workflows/ci.yml/badge.svg)](https://github.com/fatihkurt/SourceLens-RAG/actions/workflows/ci.yml)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-339933)
 ![License](https://img.shields.io/badge/license-MIT-black)
 

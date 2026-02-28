@@ -1,4 +1,4 @@
-# Decision Log - SourceLens
+# Decision Log - SourceLens-RAG
 
 ## 2026-02-19 - RAG MVP v1 (JSONL + cosine similarity)
 
