@@ -41,7 +41,7 @@
   "scripts": {
     "eval": "node ./src/eval/run_answers.js ./eval/gold.json",
     "eval:gate": "npm run eval && node ./src/eval/gate.js ./eval/last_answers_report.json",
-    "test": "tsx --test \"src/**/*.test.js\" \"src/**/*.test.ts\"",
+    "test": "node ./src/scripts/runTests.js",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
     "ingest": "node ./src/ingest.js",
