@@ -2,7 +2,8 @@
 
 Production-focused RAG core with a lightweight AI orchestration runtime (planner + tools + policies + eval gates).
 
-![Eval](https://img.shields.io/badge/eval-npm%20run%20eval-blue)
+[![Eval Gate](https://github.com/fatihkurt/SourceLens/actions/workflows/eval-gate.yml/badge.svg)](https://github.com/fatihkurt/SourceLens/actions/workflows/eval-gate.yml)
+[![CI](https://github.com/fatihkurt/SourceLens/actions/workflows/ci.yml/badge.svg)](https://github.com/fatihkurt/SourceLens/actions/workflows/ci.yml)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-339933)
 ![License](https://img.shields.io/badge/license-MIT-black)
 
@@ -116,6 +117,7 @@ Paths:
 ## Project Docs
 
 - Architecture: `docs/architecture.md`
+- Branch protection: `docs/branch-protection.md`
 - Critical checks: `docs/critical-flow-tests.md`
 - Decisions and changelog notes: `docs/decision-log.md`
 - Contribution guide: `CONTRIBUTING.md`

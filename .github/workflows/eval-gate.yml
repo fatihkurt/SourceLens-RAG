@@ -1,0 +1,82 @@
+name: Eval Gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  eval-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Preflight secret check
+        id: preflight
+        env:
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          EMBED_PROVIDER: ${{ secrets.EMBED_PROVIDER }}
+          EMBED_BASE_URL: ${{ secrets.EMBED_BASE_URL }}
+          EMBED_MODEL: ${{ secrets.EMBED_MODEL }}
+        run: |
+          missing=0
+          for var in LLM_BASE_URL LLM_API_KEY LLM_MODEL EMBED_PROVIDER EMBED_BASE_URL EMBED_MODEL; do
+            if [ -z "${!var}" ]; then
+              echo "missing_secret=$var"
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -eq 1 ]; then
+            echo "run_eval=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_eval=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip eval (missing secrets)
+        if: steps.preflight.outputs.run_eval != 'true'
+        run: |
+          echo "Skipping eval: required secrets are not configured."
+          echo "Required: LLM_BASE_URL, LLM_API_KEY, LLM_MODEL, EMBED_PROVIDER, EMBED_BASE_URL, EMBED_MODEL"
+
+      - name: Build retrieval index
+        if: steps.preflight.outputs.run_eval == 'true'
+        env:
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          EMBED_PROVIDER: ${{ secrets.EMBED_PROVIDER }}
+          EMBED_BASE_URL: ${{ secrets.EMBED_BASE_URL }}
+          EMBED_API_KEY: ${{ secrets.EMBED_API_KEY }}
+          EMBED_MODEL: ${{ secrets.EMBED_MODEL }}
+        run: npm run ingest
+
+      - name: Run eval gate
+        if: steps.preflight.outputs.run_eval == 'true'
+        env:
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          EMBED_PROVIDER: ${{ secrets.EMBED_PROVIDER }}
+          EMBED_BASE_URL: ${{ secrets.EMBED_BASE_URL }}
+          EMBED_API_KEY: ${{ secrets.EMBED_API_KEY }}
+          EMBED_MODEL: ${{ secrets.EMBED_MODEL }}
+        run: npm run eval:gate
